@@ -461,7 +461,7 @@ body::before {
 }
 
 .wallet-balance {
-    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-size: 1.9rem;
     font-weight: 800;
     font-family: 'Courier New', monospace;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
