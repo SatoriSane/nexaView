@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Check Nexa address balance in real-time">
+    <meta name="theme-color" content="#d4af37">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="/icons/icon-512x512.png">
+    
+    <title>nexaView - Nexa Balance Checker</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <img src="./full-nexa-logo.svg" alt="Nexa Logo" class="logo-icon">
+                <h1>View</h1>
+            </div>
+            <p class="subtitle">View Nexa Wallet Balances (Read-Only)</p>
+        </header>
+        
+
+        <!-- Main Card -->
+        <main class="card">
+            <!-- Add Wallet Button -->
+            <button id="addWalletBtn" class="btn btn-primary btn-add">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Add Wallet
+            </button>
+
+            <!-- Input Section (Hidden by default) -->
+            <div id="inputSection" class="input-section hidden">
+                <label for="addressInput" class="label">Enter Nexa Address</label>
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="addressInput" 
+                        class="input" 
+                        placeholder="nexa:nqtsq5g5sjkqk7wzd9wwh9423rr0tda7m027ryljkfy84cjz"
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button id="clearBtn" class="clear-btn" title="Clear">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Error Message -->
+                <div id="errorMessage" class="error-message hidden"></div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="cancelBtn" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                    <button id="checkBalanceBtn" class="btn btn-primary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 13l4 4L19 7"/>
+                        </svg>
+                        View Balance
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- Balance Display -->
+            <div id="balanceSection" class="balance-section hidden">
+                <div class="balance-card">
+                    <div class="balance-label">Confirmed Balance</div>
+                    <div class="balance-amount" id="balanceAmount">
+                        <span class="spinner"></span>
+                    </div>
+                    <div class="balance-currency">NEX</div>
+                    <div class="last-updated" id="lastUpdated"></div>
+                </div>
+                
+                <!-- Address Display -->
+                <div class="address-display">
+                    <div class="address-label">Address</div>
+                    <div class="address-content">
+                        <div class="address-text" id="addressText"></div>
+                        <button id="saveBtn" class="icon-btn save-btn" title="Save to list">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                        </button>
+                        <button id="refreshBtn" class="icon-btn" title="Refresh balance">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Wallets List -->
+            <div id="savedWalletsSection" class="saved-wallets-section hidden">
+                <div class="section-header">
+                    <h3 class="section-title">Saved Wallets</h3>
+                    <button id="refreshAllBtn" class="text-btn" title="Refresh all balances">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                        </svg>
+                        Refresh All
+                    </button>
+                </div>
+                <div id="savedWalletsList" class="saved-wallets-list"></div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Ready</span>
+            </p>
+            <p class="footer-note">
+                Public query only • No private information required
+            </p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner-large"></div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

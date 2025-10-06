@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Iconos nexaView</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+        h1 {
+            color: #6366f1;
+        }
+        .container {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        canvas {
+            border: 2px solid #334155;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: block;
+        }
+        button {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+        .instructions {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid #6366f1;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #818cf8;
+        }
+        .preview {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .preview-item {
+            text-align: center;
+        }
+        .preview-item p {
+            margin: 10px 0 0 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Generador de Iconos nexaView</h1>
+    
+    <div class="instructions">
+        <h3>📋 Instrucciones:</h3>
+        <ol>
+            <li>Los iconos se generarán automáticamente al cargar esta página</li>
+            <li>Click en "Descargar icon-128x128.png" para descargar el icono pequeño</li>
+            <li>Click en "Descargar icon-512x512.png" para descargar el icono grande</li>
+            <li>Coloca ambos archivos en la carpeta <code>/icons/</code> de tu proyecto</li>
+            <li>¡Listo! Tu PWA tendrá iconos profesionales</li>
+        </ol>
+    </div>
+
+    <div class="container">
+        <h2>Vista Previa de Iconos</h2>
+        
+        <div class="preview">
+            <div class="preview-item">
+                <canvas id="canvas128" width="128" height="128"></canvas>
+                <p>128x128 píxeles</p>
+                <button onclick="downloadIcon(128)">Descargar icon-128x128.png</button>
+            </div>
+            
+            <div class="preview-item">
+                <canvas id="canvas512" width="512" height="512"></canvas>
+                <p>512x512 píxeles</p>
+                <button onclick="downloadIcon(512)">Descargar icon-512x512.png</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para dibujar el icono
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo con gradiente
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#6366f1');
+            gradient.addColorStop(1, '#4f46e5');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Dibujar símbolo de blockchain (capas)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = size * 0.04;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const width = size * 0.6;
+            const height = size * 0.15;
+            const spacing = size * 0.15;
+            
+            // Dibujar 3 capas (representando blockchain)
+            for (let i = 0; i < 3; i++) {
+                const y = centerY - spacing + (i * spacing);
+                
+                // Capa superior (elipse)
+                ctx.beginPath();
+                ctx.ellipse(centerX, y - height/2, width/2, height/2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Líneas laterales
+                ctx.beginPath();
+                ctx.moveTo(centerX - width/2, y - height/2);
+                ctx.lineTo(centerX - width/2, y + height/2);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX + width/2, y - height/2);
+                ctx.lineTo(centerX + width/2, y + height/2);
+                ctx.stroke();
+                
+                // Capa inferior (elipse)
+                if (i === 2) {
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, y + height/2, width/2, height/2, 0, 0, Math.PI);
+                    ctx.stroke();
+                }
+            }
+            
+            // Agregar texto "NB" en la capa del medio (opcional)
+            ctx.font = `bold ${size * 0.25}px Arial`;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('NB', centerX, centerY);
+        }
+        
+        // Función para descargar el icono
+        function downloadIcon(size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            const link = document.createElement('a');
+            link.download = `icon-${size}x${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Generar iconos al cargar la página
+        window.onload = function() {
+            drawIcon(document.getElementById('canvas128'), 128);
+            drawIcon(document.getElementById('canvas512'), 512);
+        };
+    </script>
+</body>
+</html>

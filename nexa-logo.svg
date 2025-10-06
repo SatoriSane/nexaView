@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns:xodm="http://www.corel.com/coreldraw/odm/2003" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 2500 2500" style="enable-background:new 0 0 2500 2500;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;}
+	.st1{fill:#FFFD9D;}
+	.st2{fill:#B6761C;}
+	.st3{fill:#FFE144;}
+</style>
+<g id="Layer_x0020_1">
+	<rect y="0" class="st0" width="2500" height="2500"></rect>
+	<g id="_1626955901920">
+		<polygon class="st1" points="1245.7,1748.7 2500,395.1 1245.7,2458.6   "></polygon>
+		<polygon class="st2" points="1246.3,1748.7 0,395.1 1246.3,2458.6   "></polygon>
+		<polygon class="st3" points="2500,395.1 0,395.1 1245.7,1748.7   "></polygon>
+		<polygon class="st2" points="1765.9,653 734.1,653 1248.2,1208.6   "></polygon>
+		<polygon class="st1" points="1248.2,598.8 1764.7,41.4 1248.2,891.1   "></polygon>
+		<polygon class="st2" points="1248.5,598.8 735.3,41.4 1248.5,891.1   "></polygon>
+		<polygon class="st3" points="1764.7,41.4 735.3,41.4 1248.2,598.8   "></polygon>
+	</g>
+</g>
+</svg>

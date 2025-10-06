@@ -1,0 +1,444 @@
+// ===== CONFIGURATION & STATE =====
+const CONFIG = {
+    API_ENDPOINT: '/api/balance',
+    STORAGE_KEY: 'nexaView_wallets'
+};
+
+let state = {
+    currentAddress: '',
+    isLoading: false,
+    savedWallets: []
+};
+
+// ===== DOM ELEMENTS =====
+const elements = {
+    addWalletBtn: document.getElementById('addWalletBtn'),
+    inputSection: document.getElementById('inputSection'),
+    addressInput: document.getElementById('addressInput'),
+    checkBalanceBtn: document.getElementById('checkBalanceBtn'),
+    cancelBtn: document.getElementById('cancelBtn'),
+    clearBtn: document.getElementById('clearBtn'),
+    balanceSection: document.getElementById('balanceSection'),
+    balanceAmount: document.getElementById('balanceAmount'),
+    lastUpdated: document.getElementById('lastUpdated'),
+    addressText: document.getElementById('addressText'),
+    saveBtn: document.getElementById('saveBtn'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    savedWalletsSection: document.getElementById('savedWalletsSection'),
+    savedWalletsList: document.getElementById('savedWalletsList'),
+    refreshAllBtn: document.getElementById('refreshAllBtn'),
+    errorMessage: document.getElementById('errorMessage'),
+    loadingOverlay: document.getElementById('loadingOverlay'),
+    statusIndicator: document.getElementById('statusIndicator'),
+    statusText: document.getElementById('statusText')
+};
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+    registerServiceWorker();
+    loadSavedWallets();
+    setupEventListeners();
+});
+
+function initializeApp() {
+    console.log('nexaView PWA started');
+    updateStatus('Ready', 'ready');
+}
+
+// ===== SERVICE WORKER =====
+async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            console.log('Service Worker registered:', registration.scope);
+        } catch (error) {
+            console.error('Error registering Service Worker:', error);
+        }
+    }
+}
+
+// ===== EVENT LISTENERS =====
+function setupEventListeners() {
+    // Add Wallet button - shows input form
+    elements.addWalletBtn.addEventListener('click', () => {
+        elements.addWalletBtn.classList.add('hidden');
+        elements.inputSection.classList.remove('hidden');
+        elements.addressInput.focus();
+    });
+    
+    // Cancel button - hides input form
+    elements.cancelBtn.addEventListener('click', () => {
+        elements.inputSection.classList.add('hidden');
+        elements.addWalletBtn.classList.remove('hidden');
+        elements.addressInput.value = '';
+        elements.clearBtn.classList.remove('visible');
+        hideError();
+    });
+    
+    // Check balance button
+    elements.checkBalanceBtn.addEventListener('click', handleCheckBalance);
+    
+    // Enter key in input
+    elements.addressInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleCheckBalance();
+    });
+    
+    // Show/hide clear button
+    elements.addressInput.addEventListener('input', (e) => {
+        if (e.target.value.trim()) {
+            elements.clearBtn.classList.add('visible');
+        } else {
+            elements.clearBtn.classList.remove('visible');
+        }
+        hideError();
+    });
+    
+    // Clear button
+    elements.clearBtn.addEventListener('click', () => {
+        elements.addressInput.value = '';
+        elements.clearBtn.classList.remove('visible');
+        elements.addressInput.focus();
+    });
+    
+    if (elements.saveBtn) {
+        elements.saveBtn.addEventListener('click', () => {
+            if (state.currentAddress && state.currentBalance !== undefined) {
+                saveWallet(state.currentAddress, state.currentBalance);
+            }
+        });
+    }
+    
+    if (elements.refreshBtn) {
+        elements.refreshBtn.addEventListener('click', () => {
+            if (state.currentAddress) {
+                fetchBalance(state.currentAddress);
+            }
+        });
+    }
+    
+    if (elements.refreshAllBtn) {
+        elements.refreshAllBtn.addEventListener('click', refreshAllWallets);
+    }
+}
+
+// ===== ADDRESS VALIDATION =====
+function validateNexaAddress(address) {
+    if (!address || address.trim().length === 0) {
+        return { valid: false, error: 'Please enter an address' };
+    }
+    
+    const trimmedAddress = address.trim();
+    
+    if (!trimmedAddress.startsWith('nexa:')) {
+        return { valid: false, error: 'Address must start with "nexa:"' };
+    }
+    
+    if (trimmedAddress.length < 50) {
+        return { valid: false, error: 'Address appears to be too short' };
+    }
+    
+    return { valid: true, address: trimmedAddress };
+}
+
+// ===== BALANCE QUERY =====
+async function handleCheckBalance() {
+    const address = elements.addressInput.value.trim();
+    
+    const validation = validateNexaAddress(address);
+    if (!validation.valid) {
+        showError(validation.error);
+        return;
+    }
+    
+    state.currentAddress = validation.address;
+    const balance = await fetchBalance(validation.address);
+    
+    if (balance !== null) {
+        // Hide input form after successful check
+        elements.inputSection.classList.add('hidden');
+        elements.addWalletBtn.classList.remove('hidden');
+        elements.addressInput.value = '';
+        elements.clearBtn.classList.remove('visible');
+    }
+}
+
+async function fetchBalance(address, silent = false) {
+    if (state.isLoading && !silent) return;
+    
+    if (!silent) {
+        state.isLoading = true;
+        setLoadingState(true);
+        hideError();
+        updateStatus('Checking...', 'loading');
+    }
+    
+    try {
+        const response = await fetch(`${CONFIG.API_ENDPOINT}/${encodeURIComponent(address)}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        if (!silent) {
+            displayBalance(data.balance, address);
+            updateStatus('Updated', 'ready');
+        }
+        
+        return data.balance;
+        
+    } catch (error) {
+        console.error('Error fetching balance:', error);
+        if (!silent) {
+            showError(`Error: ${error.message}`);
+            updateStatus('Error', 'error');
+        }
+        return null;
+        
+    } finally {
+        if (!silent) {
+            state.isLoading = false;
+            setLoadingState(false);
+        }
+    }
+}
+
+// ===== DISPLAY BALANCE =====
+function displayBalance(balance, address) {
+    state.currentBalance = balance;
+    state.currentAddress = address;
+    
+    const formattedBalance = formatBalance(balance);
+    
+    elements.balanceAmount.textContent = formattedBalance;
+    elements.lastUpdated.textContent = `Updated: ${formatTime(Date.now())}`;
+    elements.addressText.textContent = address;
+    elements.balanceSection.classList.remove('hidden');
+    
+    // Check if already saved
+    const isSaved = state.savedWallets.some(w => w.address === address);
+    if (isSaved) {
+        elements.saveBtn.classList.add('saved');
+        elements.saveBtn.title = 'Already saved';
+    } else {
+        elements.saveBtn.classList.remove('saved');
+        elements.saveBtn.title = 'Save to list';
+    }
+}
+
+function formatBalance(balance) {
+    if (typeof balance === 'number') {
+        if (balance > 1000000) {
+            return (balance / 100).toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            });
+        }
+        return balance.toLocaleString('en-US', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        });
+    }
+    return balance;
+}
+
+function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+}
+
+// ===== SAVED WALLETS =====
+function loadSavedWallets() {
+    try {
+        const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
+        state.savedWallets = stored ? JSON.parse(stored) : [];
+        renderSavedWallets();
+    } catch (error) {
+        console.error('Error loading saved wallets:', error);
+        state.savedWallets = [];
+    }
+}
+
+function saveWallet(address, balance) {
+    // Check if already exists
+    const existingIndex = state.savedWallets.findIndex(w => w.address === address);
+    
+    if (existingIndex !== -1) {
+        // Update existing
+        state.savedWallets[existingIndex] = {
+            address,
+            balance,
+            timestamp: Date.now()
+        };
+    } else {
+        // Add new
+        state.savedWallets.unshift({
+            address,
+            balance,
+            timestamp: Date.now()
+        });
+    }
+    
+    // Save to localStorage
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
+    
+    // Update UI
+    renderSavedWallets();
+    elements.saveBtn.classList.add('saved');
+    elements.saveBtn.title = 'Already saved';
+    
+    updateStatus('Wallet saved', 'ready');
+}
+
+function deleteWallet(address) {
+    state.savedWallets = state.savedWallets.filter(w => w.address !== address);
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
+    renderSavedWallets();
+    
+    if (state.currentAddress === address) {
+        elements.saveBtn.classList.remove('saved');
+        elements.saveBtn.title = 'Save to list';
+    }
+}
+
+async function refreshAllWallets() {
+    updateStatus('Refreshing all...', 'loading');
+    
+    for (let wallet of state.savedWallets) {
+        const balance = await fetchBalance(wallet.address, true);
+        if (balance !== null) {
+            wallet.balance = balance;
+            wallet.timestamp = Date.now();
+        }
+    }
+    
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
+    renderSavedWallets();
+    updateStatus('All wallets updated', 'ready');
+}
+
+function renderSavedWallets() {
+    if (state.savedWallets.length === 0) {
+        elements.savedWalletsSection.classList.add('hidden');
+        return;
+    }
+    
+    elements.savedWalletsSection.classList.remove('hidden');
+    elements.savedWalletsList.innerHTML = '';
+    
+    state.savedWallets.forEach(wallet => {
+        const walletItem = document.createElement('div');
+        walletItem.className = 'wallet-item';
+        if (wallet.address === state.currentAddress) {
+            walletItem.classList.add('active');
+        }
+        
+        walletItem.innerHTML = `
+            <div class="wallet-header">
+                <div>
+                    <span class="wallet-balance">${formatBalance(wallet.balance)}</span>
+                    <span class="wallet-currency">NEX</span>
+                </div>
+                <div class="wallet-actions">
+                    <button class="wallet-btn refresh-wallet" title="Refresh balance">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                        </svg>
+                    </button>
+                    <button class="wallet-btn delete-wallet" title="Delete wallet">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="wallet-address">${wallet.address}</div>
+            <div class="wallet-updated">Updated: ${formatTime(wallet.timestamp)}</div>
+        `;
+        
+        // Click on wallet to view
+        walletItem.addEventListener('click', (e) => {
+            if (!e.target.closest('.wallet-btn')) {
+                displayBalance(wallet.balance, wallet.address);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        
+        // Refresh button
+        const refreshBtn = walletItem.querySelector('.refresh-wallet');
+        refreshBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            refreshBtn.style.opacity = '0.5';
+            const balance = await fetchBalance(wallet.address, true);
+            if (balance !== null) {
+                wallet.balance = balance;
+                wallet.timestamp = Date.now();
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
+                renderSavedWallets();
+            }
+            refreshBtn.style.opacity = '1';
+        });
+        
+        // Delete button
+        const deleteBtn = walletItem.querySelector('.delete-wallet');
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm('Delete this wallet from the list?')) {
+                deleteWallet(wallet.address);
+            }
+        });
+        
+        elements.savedWalletsList.appendChild(walletItem);
+    });
+}
+
+// ===== UI HELPERS =====
+function setLoadingState(loading) {
+    elements.checkBalanceBtn.disabled = loading;
+    
+    if (loading) {
+        elements.loadingOverlay.classList.remove('hidden');
+    } else {
+        elements.loadingOverlay.classList.add('hidden');
+    }
+}
+
+function showError(message) {
+    elements.errorMessage.textContent = message;
+    elements.errorMessage.classList.remove('hidden');
+}
+
+function hideError() {
+    elements.errorMessage.classList.add('hidden');
+}
+
+function updateStatus(text, type = 'ready') {
+    elements.statusText.textContent = text;
+    elements.statusIndicator.className = 'status-indicator';
+    
+    if (type === 'error') {
+        elements.statusIndicator.classList.add('error');
+    } else if (type === 'loading') {
+        elements.statusIndicator.classList.add('loading');
+    }
+}
+
+// ===== CONNECTION DETECTION =====
+window.addEventListener('online', () => {
+    updateStatus('Connection restored', 'ready');
+});
+
+window.addEventListener('offline', () => {
+    updateStatus('Offline', 'error');
+    showError('No internet connection');
+});
