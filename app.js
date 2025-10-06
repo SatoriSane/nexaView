@@ -117,43 +117,33 @@ function showUpdateNotification(newWorker) {
         });
     }
 }
-
-// ===== PWA INSTALL BUTTON =====
+// ===== PWA INSTALL PROMPT =====
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault(); // evita que el navegador muestre el prompt automáticamente
+    e.preventDefault();
     deferredPrompt = e;
 
-    // Crear botón solo si no existe
-    if (!document.getElementById('installBtn')) {
-        const header = document.querySelector('.header');
-        const installBtn = document.createElement('button');
-        installBtn.id = 'installBtn';
-        installBtn.textContent = 'Install NexaView';
-        installBtn.style.marginLeft = 'auto';
-        installBtn.style.padding = '0.4rem 0.8rem';
-        installBtn.style.fontSize = '0.9rem';
-        installBtn.style.cursor = 'pointer';
-        installBtn.style.background = '#d4af37';
-        installBtn.style.color = '#000';
-        installBtn.style.border = 'none';
-        installBtn.style.borderRadius = '6px';
-        installBtn.style.transition = '0.2s';
-        installBtn.addEventListener('mouseenter', () => installBtn.style.opacity = '0.8');
-        installBtn.addEventListener('mouseleave', () => installBtn.style.opacity = '1');
-
-        header.appendChild(installBtn);
-
-        installBtn.addEventListener('click', async () => {
-            installBtn.disabled = true;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log('User choice:', outcome);
-            if (outcome === 'accepted') installBtn.style.display = 'none';
-            deferredPrompt = null;
-        });
+    // Crear o mostrar el prompt
+    let prompt = document.querySelector('.install-prompt');
+    if (!prompt) {
+        prompt = document.createElement('div');
+        prompt.className = 'install-prompt';
+        prompt.innerHTML = `
+            <span>📲 Install NexaView for quick access</span>
+            <button class="btn btn-primary" id="installBtn">Install</button>
+        `;
+        document.body.appendChild(prompt);
+    } else {
+        prompt.classList.remove('hidden');
     }
+
+    document.getElementById('installBtn').addEventListener('click', async () => {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') prompt.remove();
+        deferredPrompt = null;
+    });
 });
 
 // Ocultar botón si la app ya fue instalada
