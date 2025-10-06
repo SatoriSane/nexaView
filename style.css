@@ -339,6 +339,11 @@ body::before {
     box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
 }
 
+/* Current wallet always shows buttons */
+.current-wallet .wallet-actions {
+    opacity: 1;
+}
+
 .current-wallet .save-btn:hover {
     background: rgba(16, 185, 129, 0.2);
     border-color: var(--success);
@@ -453,15 +458,27 @@ body::before {
     background: rgba(212, 175, 55, 0.05);
 }
 
-.wallet-header {
+/* Wallet top section: address + actions */
+.wallet-top {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+/* Balance centered section */
+.wallet-balance-center {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 8px;
+    margin: 20px 0;
+    padding: 0 10px;
 }
 
 .wallet-balance {
-    font-size: 1.9rem;
+    font-size: 2.1rem;
     font-weight: 800;
     font-family: 'Courier New', monospace;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
@@ -470,11 +487,9 @@ body::before {
     background-clip: text;
     letter-spacing: -0.5px;
     white-space: nowrap;
-    max-width: 100%;
     filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.5));
     display: flex;
     align-items: baseline;
-    overflow: visible;
 }
 
 .wallet-balance .decimal-part {
@@ -484,19 +499,28 @@ body::before {
     flex-shrink: 0;
 }
 
-.wallet-currency {
-    font-size: 0.9rem;
-    color: var(--gold);
-    font-weight: 600;
-    margin-left: 8px;
-}
-.logo-icon-min{
-    width: 21px;
-    height: 21px;
+.logo-icon-min {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
 }
 .wallet-actions {
     display: flex;
     gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wallet-item.active .wallet-actions {
+    opacity: 1;
+}
+
+.wallet-item:hover .wallet-actions {
+    opacity: 0.5;
+}
+
+.wallet-item.active:hover .wallet-actions {
+    opacity: 1;
 }
 
 .wallet-btn {
@@ -538,7 +562,8 @@ body::before {
     color: var(--text-secondary);
     word-break: break-all;
     line-height: 1.4;
-    margin-top: 8px;
+    flex: 1;
+    min-width: 0;
 }
 
 .wallet-updated {

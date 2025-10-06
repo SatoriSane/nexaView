@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function initializeApp() {
-    console.log('%c🚀 nexaView v1.0.9', 'color: #d4af37; font-size: 20px; font-weight: bold;');
+    console.log('%c🚀 nexaView v1.1.1', 'color: #d4af37; font-size: 20px; font-weight: bold;');
     console.log('%cIf you see old content, run this command:', 'color: #f4d03f; font-size: 14px;');
     console.log('%cnavigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(() => caches.keys().then(k => Promise.all(k.map(c => caches.delete(c))))).then(() => location.reload())', 'background: #1a1a1a; color: #d4af37; padding: 10px; border-radius: 5px; font-family: monospace;');
     updateStatus('Ready', 'ready');
@@ -337,13 +337,8 @@ function displayBalance(balance, address) {
     const isSaved = state.savedWallets.some(w => w.address === address);
     
     elements.currentWalletCard.innerHTML = `
-        <div class="wallet-header">
-            <div>
-                <span class="wallet-balance">
-                    <img src="./nexa-logo.svg" alt="Nexa Logo" class="logo-icon-min">
-                    ${formatBalance(balance)}
-                </span>
-            </div>
+        <div class="wallet-top">
+            <div class="wallet-address">${address}</div>
             <div class="wallet-actions">
                 ${isSaved ? `
                     <button class="wallet-btn current-refresh" title="Refresh balance">
@@ -367,7 +362,10 @@ function displayBalance(balance, address) {
                 </button>
             </div>
         </div>
-        <div class="wallet-address">${address}</div>
+        <div class="wallet-balance-center">
+            <img src="./nexa-logo.svg" alt="Nexa Logo" class="logo-icon-min">
+            <span class="wallet-balance">${formatBalance(balance)}</span>
+        </div>
         <div class="wallet-updated">Updated: ${formatTime(Date.now())}</div>
     `;
     
@@ -533,16 +531,10 @@ function renderSavedWallets() {
     state.savedWallets.forEach(wallet => {
         const walletItem = document.createElement('div');
         walletItem.className = 'wallet-item';
-        if (wallet.address === state.currentAddress) {
-            walletItem.classList.add('active');
-        }
         
         walletItem.innerHTML = `
-            <div class="wallet-header">
-                <div>
-                    <span class="wallet-balance">                <img src="./nexa-logo.svg" alt="Nexa Logo" class="logo-icon-min">
-${formatBalance(wallet.balance)}</span>
-                </div>
+            <div class="wallet-top">
+                <div class="wallet-address">${wallet.address}</div>
                 <div class="wallet-actions">
                     <button class="wallet-btn refresh-wallet" title="Refresh balance">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -556,15 +548,32 @@ ${formatBalance(wallet.balance)}</span>
                     </button>
                 </div>
             </div>
-            <div class="wallet-address">${wallet.address}</div>
+            <div class="wallet-balance-center">
+                <img src="./nexa-logo.svg" alt="Nexa Logo" class="logo-icon-min">
+                <span class="wallet-balance">${formatBalance(wallet.balance)}</span>
+            </div>
             <div class="wallet-updated">Updated: ${formatTime(wallet.timestamp)}</div>
         `;
         
-        // Click on wallet to view
+        // Click on wallet to select/deselect
         walletItem.addEventListener('click', (e) => {
             if (!e.target.closest('.wallet-btn')) {
-                displayBalance(wallet.balance, wallet.address);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Toggle selection
+                const isCurrentlyActive = walletItem.classList.contains('active');
+                
+                // Remove active from all wallets
+                document.querySelectorAll('.wallet-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // If it wasn't active, make it active
+                if (!isCurrentlyActive) {
+                    walletItem.classList.add('active');
+                    state.currentAddress = wallet.address;
+                } else {
+                    // If it was active, deselect it
+                    state.currentAddress = '';
+                }
             }
         });
         

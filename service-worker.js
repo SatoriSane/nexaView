@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v1.0.9';
+const CACHE_VERSION = 'nexaView-v1.1.1';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
