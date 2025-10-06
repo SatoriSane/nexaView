@@ -213,7 +213,7 @@ GET /api/balance/:address
 
 **Example**:
 ```bash
-curl https://your-domain.vercel.app/api/balance/nexa:nqtsq5g5sjkqk7wzd9wwh9423rr0tda7m027ryljkfy84cjz
+curl https://your-domain.vercel.app/api/balance/nexa:nqtsq5g5wfl0zrvgry8fyuuxmulmsved0kfg2qmx5w6vf760
 ```
 
 **Response**:
@@ -227,7 +227,7 @@ curl https://your-domain.vercel.app/api/balance/nexa:nqtsq5g5sjkqk7wzd9wwh9423rr
 }
 ```
 
-**Note**: Balance is returned in satoshis (1 NEX = 100 satoshis). The frontend automatically converts it for display.
+**Note**: Balance is returned in satoshis (1 NEXA = 100 satoshis). The frontend automatically converts it for display.
 
 ## 🤝 Contributing
 

@@ -106,7 +106,6 @@ body::before {
     font-size: 0.95rem;
 
     position: relative;    /* para poder mover con left */
-    left: 40px;            /* ajusta según el ancho del logo que sobresale */
 }
 
 

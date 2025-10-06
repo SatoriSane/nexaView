@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     
     try {
         // Extraer dirección de la URL
-        // URL format: /api/balance/nexa:nqtsq5g5sjkqk7wzd9wwh9423rr0tda7m027ryljkfy84cjz
+        // URL format: /api/balance/nexa:nqt....
         const address = req.query.address || extractAddressFromPath(req.url);
         
         if (!address) {

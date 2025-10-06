@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/balance/:address",
-      "destination": "/api/balance"
+      "destination": "/api/balance.js"
     }
   ],
   "headers": [
@@ -23,6 +23,15 @@
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type"
+        }
+      ]
+    },
+    {
+      "source": "/(index.html|app.js|style.css)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     },

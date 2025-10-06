@@ -43,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function initializeApp() {
-    console.log('nexaView PWA started');
+    console.log('%c🚀 nexaView v1.0.4', 'color: #d4af37; font-size: 20px; font-weight: bold;');
+    console.log('%cIf you see old content, run this command:', 'color: #f4d03f; font-size: 14px;');
+    console.log('%cnavigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(() => caches.keys().then(k => Promise.all(k.map(c => caches.delete(c))))).then(() => location.reload())', 'background: #1a1a1a; color: #d4af37; padding: 10px; border-radius: 5px; font-family: monospace;');
     updateStatus('Ready', 'ready');
 }
 
@@ -454,7 +456,7 @@ function renderSavedWallets() {
             <div class="wallet-header">
                 <div>
                     <span class="wallet-balance">${formatBalance(wallet.balance)}</span>
-                    <span class="wallet-currency">NEX</span>
+                    <span class="wallet-currency">NEXA</span>
                 </div>
                 <div class="wallet-actions">
                     <button class="wallet-btn refresh-wallet" title="Refresh balance">

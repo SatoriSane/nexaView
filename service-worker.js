@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v1.0.3';
+const CACHE_VERSION = 'nexaView-v1.0.4';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -94,13 +94,23 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
-    // Estrategia para API: Network First, fallback a Cache
+    // Archivos críticos que SIEMPRE deben estar actualizados
+    const criticalFiles = ['/index.html', '/app.js', '/style.css', '/'];
+    const isCritical = criticalFiles.some(file => url.pathname === file || url.pathname.endsWith(file));
+    
+    // Estrategia para API: Network First
     if (url.pathname.startsWith('/api/')) {
         event.respondWith(networkFirstStrategy(request));
         return;
     }
     
-    // Estrategia para assets estáticos: Cache First, fallback a Network
+    // Estrategia para archivos críticos: NETWORK FIRST (siempre actualizado)
+    if (isCritical) {
+        event.respondWith(networkFirstStrategy(request));
+        return;
+    }
+    
+    // Estrategia para otros assets (iconos, etc): Cache First
     event.respondWith(cacheFirstStrategy(request));
 });
 
