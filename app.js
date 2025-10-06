@@ -54,36 +54,48 @@ async function registerServiceWorker() {
             const registration = await navigator.serviceWorker.register('/service-worker.js');
             console.log('Service Worker registered:', registration.scope);
             
-            // Detectar actualizaciones y forzar recarga
+            // Forzar actualización inmediata si hay un worker esperando
+            if (registration.waiting) {
+                console.log('Service Worker waiting detected, forcing update...');
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+                return;
+            }
+            
+            // Detectar actualizaciones
             registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
                 console.log('New Service Worker found, installing...');
                 
                 newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'activated') {
-                        console.log('New Service Worker activated!');
-                        // Mostrar notificación y recargar
-                        if (confirm('New version available! Reload to update?')) {
-                            window.location.reload();
-                        }
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Hay un nuevo SW instalado pero el viejo sigue activo
+                        console.log('New version ready! Showing update notification...');
+                        showUpdateNotification(newWorker);
                     }
                 });
             });
             
-            // Verificar actualizaciones cada 60 segundos
+            // Verificar actualizaciones cada 30 segundos (más frecuente)
             setInterval(() => {
                 registration.update();
-            }, 60000);
+            }, 30000);
+            
+            // Verificar inmediatamente al cargar
+            registration.update();
             
             // Escuchar mensajes del Service Worker
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data.type === 'SW_UPDATED') {
                     console.log('Service Worker updated to:', event.data.version);
-                    // Recargar automáticamente
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    window.location.reload();
                 }
+            });
+            
+            // Detectar cuando el controller cambia (nuevo SW tomó control)
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('Controller changed, reloading...');
+                window.location.reload();
             });
             
         } catch (error) {
@@ -91,6 +103,23 @@ async function registerServiceWorker() {
         }
     }
 }
+
+// Mostrar notificación de actualización
+function showUpdateNotification(newWorker) {
+    const notification = document.getElementById('updateNotification');
+    const updateBtn = document.getElementById('updateBtn');
+    
+    if (notification && updateBtn) {
+        notification.classList.remove('hidden');
+        
+        updateBtn.addEventListener('click', () => {
+            console.log('User clicked update, forcing activation...');
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+            notification.classList.add('hidden');
+        });
+    }
+}
+
 // ===== PWA INSTALL BUTTON =====
 let deferredPrompt;
 

@@ -1,8 +1,16 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v1.0.2';
+const CACHE_VERSION = 'nexaView-v1.0.3';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
+
+// Escuchar mensajes para forzar activación
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('[SW] Received SKIP_WAITING message, activating immediately...');
+        self.skipWaiting();
+    }
+});
 
 // Archivos a cachear durante la instalación
 const STATIC_ASSETS = [
