@@ -53,6 +53,39 @@ async function registerServiceWorker() {
         try {
             const registration = await navigator.serviceWorker.register('/service-worker.js');
             console.log('Service Worker registered:', registration.scope);
+            
+            // Detectar actualizaciones y forzar recarga
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log('New Service Worker found, installing...');
+                
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'activated') {
+                        console.log('New Service Worker activated!');
+                        // Mostrar notificación y recargar
+                        if (confirm('New version available! Reload to update?')) {
+                            window.location.reload();
+                        }
+                    }
+                });
+            });
+            
+            // Verificar actualizaciones cada 60 segundos
+            setInterval(() => {
+                registration.update();
+            }, 60000);
+            
+            // Escuchar mensajes del Service Worker
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'SW_UPDATED') {
+                    console.log('Service Worker updated to:', event.data.version);
+                    // Recargar automáticamente
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            });
+            
         } catch (error) {
             console.error('Error registering Service Worker:', error);
         }

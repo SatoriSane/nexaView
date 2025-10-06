@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v1.0.1';
+const CACHE_VERSION = 'nexaView-v1.0.2';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -17,32 +17,33 @@ const STATIC_ASSETS = [
 
 // ===== INSTALACIÓN =====
 self.addEventListener('install', (event) => {
-    console.log('[SW] Instalando Service Worker...');
+    console.log('[SW] Installing Service Worker v' + CACHE_VERSION);
     
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('[SW] Cacheando archivos estáticos');
+                console.log('[SW] Caching static assets');
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
-                console.log('[SW] Instalación completa');
+                console.log('[SW] Installation complete - forcing activation');
+                // Forzar activación inmediata sin esperar
                 return self.skipWaiting();
             })
             .catch((error) => {
-                console.error('[SW] Error durante instalación:', error);
+                console.error('[SW] Installation error:', error);
             })
     );
 });
 
 // ===== ACTIVACIÓN =====
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Activando Service Worker...');
+    console.log('[SW] Activating Service Worker v' + CACHE_VERSION);
     
     event.waitUntil(
         caches.keys()
             .then((cacheNames) => {
-                // Eliminar cachés antiguos
+                // Eliminar TODOS los cachés antiguos inmediatamente
                 return Promise.all(
                     cacheNames
                         .filter((name) => {
@@ -51,14 +52,26 @@ self.addEventListener('activate', (event) => {
                                    name !== RUNTIME_CACHE;
                         })
                         .map((name) => {
-                            console.log('[SW] Eliminando caché antiguo:', name);
+                            console.log('[SW] Deleting old cache:', name);
                             return caches.delete(name);
                         })
                 );
             })
             .then(() => {
-                console.log('[SW] Activación completa');
+                console.log('[SW] Activation complete - taking control');
+                // Tomar control de todas las páginas inmediatamente
                 return self.clients.claim();
+            })
+            .then(() => {
+                // Notificar a todos los clientes que hay una nueva versión
+                return self.clients.matchAll().then(clients => {
+                    clients.forEach(client => {
+                        client.postMessage({
+                            type: 'SW_UPDATED',
+                            version: CACHE_VERSION
+                        });
+                    });
+                });
             })
     );
 });
