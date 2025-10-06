@@ -322,103 +322,6 @@ body::before {
     height: 20px;
 }
 
-/* Address Display */
-.address-display {
-    margin-top: 24px;
-    padding: 20px;
-    background: rgba(10, 10, 10, 0.5);
-    border-radius: 16px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.address-label {
-    font-size: 0.8rem;
-    color: var(--gold-light);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 12px;
-    font-weight: 600;
-}
-
-.address-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.address-text {
-    flex: 1;
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    word-break: break-all;
-    line-height: 1.5;
-    padding: 8px 0;
-}
-
-.icon-btn {
-    background: rgba(212, 175, 55, 0.1);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    border-radius: 10px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.icon-btn svg {
-    width: 20px;
-    height: 20px;
-    color: var(--gold);
-    transition: all 0.3s ease;
-}
-
-.icon-btn:hover {
-    background: rgba(212, 175, 55, 0.2);
-    border-color: var(--gold);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-}
-
-.icon-btn:hover svg {
-    transform: rotate(180deg);
-}
-
-.delete-btn:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: var(--error);
-}
-
-.delete-btn:hover svg {
-    color: var(--error);
-    transform: scale(1.1) rotate(0deg);
-}
-
-.save-btn:hover {
-    background: rgba(16, 185, 129, 0.2);
-    border-color: var(--success);
-}
-
-.save-btn:hover svg {
-    color: var(--success);
-    transform: scale(1.1) rotate(0deg);
-}
-
-.save-btn.saved {
-    background: rgba(16, 185, 129, 0.2);
-    border-color: var(--success);
-}
-
-.save-btn.saved svg {
-    color: var(--success);
-}
-
-.icon-btn:active {
-    transform: translateY(0);
-}
 
 /* ===== BALANCE SECTION ===== */
 .balance-section {
@@ -430,95 +333,28 @@ body::before {
     display: none;
 }
 
-.balance-card {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(184, 148, 31, 0.2) 100%);
-    padding: 4px 4px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 
-        0 12px 48px rgba(212, 175, 55, 0.4),
-        inset 0 2px 0 rgba(212, 175, 55, 0.3);
-    border: 3px solid rgba(212, 175, 55, 0.4);
-    position: relative;
-    overflow: hidden;
+/* Current wallet uses same style as saved wallets */
+.current-wallet {
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
 }
 
-.balance-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
-    animation: shimmer 3s infinite;
+.current-wallet .save-btn:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: var(--success);
 }
 
-@keyframes shimmer {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(10%, 10%); }
+.current-wallet .save-btn:hover svg {
+    color: var(--success);
 }
 
-.balance-label {
-    font-size: 0.85rem;
-    color: var(--gold-light);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    font-weight: 700;
-    position: relative;
-    z-index: 1;
-    opacity: 0.9;
+.current-wallet .delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: var(--error);
 }
 
-.balance-amount {
-    font-size: clamp(1.6rem, 4vw, 3rem);
-    font-weight: 800;
-    margin: 32px 0;
-    font-family: 'Courier New', monospace;
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 3px 15px rgba(212, 175, 55, 0.8));
-    position: relative;
-    z-index: 1;
-    line-height: 1.2;
-    letter-spacing: -1px;
-    white-space: nowrap;
-    text-align: center;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: baseline;
-    padding: 0 10px;
-    box-sizing: border-box;
-    overflow: visible;
-}
-
-.balance-amount .decimal-part {
-    font-size: 0.5em;
-    opacity: 0.8;
-    margin-left: 2px;
-    flex-shrink: 0;
-}
-
-.balance-currency {
-    font-size: 1.6rem;
-    color: var(--gold);
-    font-weight: 800;
-    letter-spacing: 3px;
-    position: relative;
-    z-index: 1;
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-}
-
-.last-updated {
-    margin-top: 16px;
-    font-size: 0.85rem;
-    opacity: 0.8;
-    position: relative;
-    z-index: 1;
+.current-wallet .delete-btn:hover svg {
+    color: var(--error);
 }
 
 /* ===== SAVED WALLETS SECTION ===== */
@@ -654,7 +490,10 @@ body::before {
     font-weight: 600;
     margin-left: 8px;
 }
-
+.logo-icon-min{
+    width: 21px;
+    height: 21px;
+}
 .wallet-actions {
     display: flex;
     gap: 8px;

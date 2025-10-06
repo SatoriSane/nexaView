@@ -19,11 +19,7 @@ const elements = {
     cancelBtn: document.getElementById('cancelBtn'),
     clearBtn: document.getElementById('clearBtn'),
     balanceSection: document.getElementById('balanceSection'),
-    balanceAmount: document.getElementById('balanceAmount'),
-    lastUpdated: document.getElementById('lastUpdated'),
-    addressText: document.getElementById('addressText'),
-    saveBtn: document.getElementById('saveBtn'),
-    refreshBtn: document.getElementById('refreshBtn'),
+    currentWalletCard: document.getElementById('currentWalletCard'),
     savedWalletsSection: document.getElementById('savedWalletsSection'),
     savedWalletsList: document.getElementById('savedWalletsList'),
     refreshAllBtn: document.getElementById('refreshAllBtn'),
@@ -43,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function initializeApp() {
-    console.log('%c🚀 nexaView v1.0.8', 'color: #d4af37; font-size: 20px; font-weight: bold;');
+    console.log('%c🚀 nexaView v1.0.9', 'color: #d4af37; font-size: 20px; font-weight: bold;');
     console.log('%cIf you see old content, run this command:', 'color: #f4d03f; font-size: 14px;');
     console.log('%cnavigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(() => caches.keys().then(k => Promise.all(k.map(c => caches.delete(c))))).then(() => location.reload())', 'background: #1a1a1a; color: #d4af37; padding: 10px; border-radius: 5px; font-family: monospace;');
     updateStatus('Ready', 'ready');
@@ -338,24 +334,73 @@ function displayBalance(balance, address) {
     state.currentBalance = balance;
     state.currentAddress = address;
     
-    const formattedBalance = formatBalance(balance);
+    const isSaved = state.savedWallets.some(w => w.address === address);
     
-    elements.balanceAmount.innerHTML = formattedBalance;
-    elements.lastUpdated.textContent = `Updated: ${formatTime(Date.now())}`;
-    elements.addressText.textContent = address;
+    elements.currentWalletCard.innerHTML = `
+        <div class="wallet-header">
+            <div>
+                <span class="wallet-balance">
+                    <img src="./nexa-logo.svg" alt="Nexa Logo" class="logo-icon-min">
+                    ${formatBalance(balance)}
+                </span>
+            </div>
+            <div class="wallet-actions">
+                ${isSaved ? `
+                    <button class="wallet-btn current-refresh" title="Refresh balance">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                        </svg>
+                    </button>
+                ` : `
+                    <button class="wallet-btn current-save save-btn" title="Save to list">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                    </button>
+                `}
+                <button class="wallet-btn current-delete delete-btn" title="Clear">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="wallet-address">${address}</div>
+        <div class="wallet-updated">Updated: ${formatTime(Date.now())}</div>
+    `;
+    
     elements.balanceSection.classList.remove('hidden');
     
-    // Ajustar tamaño de fuente si el número es muy largo
-    adjustBalanceFontSize(elements.balanceAmount);
+    // Ajustar tamaño de fuente
+    const balanceElement = elements.currentWalletCard.querySelector('.wallet-balance');
+    if (balanceElement) {
+        adjustBalanceFontSize(balanceElement);
+    }
     
-    // Check if already saved
-    const isSaved = state.savedWallets.some(w => w.address === address);
-    if (isSaved) {
-        elements.saveBtn.classList.add('saved');
-        elements.saveBtn.title = 'Already saved';
-    } else {
-        elements.saveBtn.classList.remove('saved');
-        elements.saveBtn.title = 'Save to list';
+    // Event listeners para los botones
+    const saveBtn = elements.currentWalletCard.querySelector('.current-save');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            saveWallet(address, balance);
+        });
+    }
+    
+    const refreshBtn = elements.currentWalletCard.querySelector('.current-refresh');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            fetchBalance(address);
+        });
+    }
+    
+    const deleteBtn = elements.currentWalletCard.querySelector('.current-delete');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            elements.balanceSection.classList.add('hidden');
+            state.currentAddress = '';
+            state.currentBalance = null;
+        });
     }
 }
 
@@ -495,8 +540,8 @@ function renderSavedWallets() {
         walletItem.innerHTML = `
             <div class="wallet-header">
                 <div>
-                    <span class="wallet-balance">${formatBalance(wallet.balance)}</span>
-                    <span class="wallet-currency">NEXA</span>
+                    <span class="wallet-balance">                <img src="./nexa-logo.svg" alt="Nexa Logo" class="logo-icon-min">
+${formatBalance(wallet.balance)}</span>
                 </div>
                 <div class="wallet-actions">
                     <button class="wallet-btn refresh-wallet" title="Refresh balance">
