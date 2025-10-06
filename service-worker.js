@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v1.0.4';
+const CACHE_VERSION = 'nexaView-v1.0.8';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -18,9 +18,8 @@ const STATIC_ASSETS = [
     '/index.html',
     '/style.css',
     '/app.js',
-    '/manifest.json',
-    '/icons/icon-128x128.png',
-    '/icons/icon-512x512.png'
+    '/manifest.json'
+    // Los iconos se cachearán dinámicamente cuando se soliciten
 ];
 
 // ===== INSTALACIÓN =====

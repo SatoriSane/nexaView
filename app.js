@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function initializeApp() {
-    console.log('%c🚀 nexaView v1.0.4', 'color: #d4af37; font-size: 20px; font-weight: bold;');
+    console.log('%c🚀 nexaView v1.0.8', 'color: #d4af37; font-size: 20px; font-weight: bold;');
     console.log('%cIf you see old content, run this command:', 'color: #f4d03f; font-size: 14px;');
     console.log('%cnavigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(() => caches.keys().then(k => Promise.all(k.map(c => caches.delete(c))))).then(() => location.reload())', 'background: #1a1a1a; color: #d4af37; padding: 10px; border-radius: 5px; font-family: monospace;');
     updateStatus('Ready', 'ready');
@@ -283,13 +283,28 @@ async function fetchBalance(address, silent = false) {
     }
     
     try {
-        const response = await fetch(`${CONFIG.API_ENDPOINT}/${encodeURIComponent(address)}`);
+        const response = await fetch(`${CONFIG.API_ENDPOINT}?address=${encodeURIComponent(address)}`);
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
         
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`HTTP Error: ${response.status} - ${errorText}`);
         }
         
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response was:', responseText);
+            throw new Error('Invalid JSON response from server');
+        }
         
         if (data.error) {
             throw new Error(data.error);
@@ -325,10 +340,13 @@ function displayBalance(balance, address) {
     
     const formattedBalance = formatBalance(balance);
     
-    elements.balanceAmount.textContent = formattedBalance;
+    elements.balanceAmount.innerHTML = formattedBalance;
     elements.lastUpdated.textContent = `Updated: ${formatTime(Date.now())}`;
     elements.addressText.textContent = address;
     elements.balanceSection.classList.remove('hidden');
+    
+    // Ajustar tamaño de fuente si el número es muy largo
+    adjustBalanceFontSize(elements.balanceAmount);
     
     // Check if already saved
     const isSaved = state.savedWallets.some(w => w.address === address);
@@ -343,16 +361,15 @@ function displayBalance(balance, address) {
 
 function formatBalance(balance) {
     if (typeof balance === 'number') {
-        if (balance > 1000000) {
-            return (balance / 100).toLocaleString('en-US', { 
-                minimumFractionDigits: 2, 
-                maximumFractionDigits: 2 
-            });
-        }
-        return balance.toLocaleString('en-US', { 
-            minimumFractionDigits: 2, 
-            maximumFractionDigits: 2 
-        });
+        // Convert from satoshis to NEXA (1 NEXA = 100 satoshis)
+        const nexaAmount = balance / 100;
+        
+        // Separar parte entera y decimal
+        const integerPart = Math.floor(nexaAmount).toLocaleString('en-US');
+        const decimalPart = (nexaAmount % 1).toFixed(2).substring(2);
+        
+        // Retornar con HTML para hacer los decimales más pequeños
+        return `${integerPart}<span class="decimal-part">.${decimalPart}</span>`;
     }
     return balance;
 }
@@ -363,6 +380,28 @@ function formatTime(timestamp) {
         hour: '2-digit', 
         minute: '2-digit', 
         second: '2-digit' 
+    });
+}
+
+// Ajustar tamaño de fuente dinámicamente para que siempre quepa
+function adjustBalanceFontSize(element) {
+    // Resetear cualquier ajuste previo
+    element.style.fontSize = '';
+    
+    // Esperar un frame para que el navegador calcule el tamaño
+    requestAnimationFrame(() => {
+        const container = element.parentElement;
+        const containerWidth = container.offsetWidth - 40; // padding
+        const contentWidth = element.scrollWidth;
+        
+        if (contentWidth > containerWidth) {
+            // Calcular el factor de escala necesario
+            const scale = containerWidth / contentWidth;
+            const currentSize = parseFloat(window.getComputedStyle(element).fontSize);
+            const newSize = currentSize * scale * 0.95; // 0.95 para dar un poco de margen
+            
+            element.style.fontSize = `${newSize}px`;
+        }
     });
 }
 
@@ -401,10 +440,11 @@ function saveWallet(address, balance) {
     // Save to localStorage
     localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
     
+    // Hide balance section after saving
+    elements.balanceSection.classList.add('hidden');
+    
     // Update UI
     renderSavedWallets();
-    elements.saveBtn.classList.add('saved');
-    elements.saveBtn.title = 'Already saved';
     
     updateStatus('Wallet saved', 'ready');
 }
@@ -508,6 +548,12 @@ function renderSavedWallets() {
         });
         
         elements.savedWalletsList.appendChild(walletItem);
+        
+        // Ajustar tamaño de fuente del balance en la lista
+        const balanceElement = walletItem.querySelector('.wallet-balance');
+        if (balanceElement) {
+            adjustBalanceFontSize(balanceElement);
+        }
     });
 }
 

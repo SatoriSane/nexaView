@@ -1,13 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "echo 'No build needed'",
-  "outputDirectory": ".",
-  "rewrites": [
-    {
-      "source": "/api/balance/:address",
-      "destination": "/api/balance.js"
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",

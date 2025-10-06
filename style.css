@@ -432,8 +432,8 @@ body::before {
 
 .balance-card {
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(184, 148, 31, 0.2) 100%);
-    padding: 48px 40px;
-    border-radius: 24px;
+    padding: 4px 4px;
+    border-radius: 12px;
     text-align: center;
     box-shadow: 
         0 12px 48px rgba(212, 175, 55, 0.4),
@@ -472,7 +472,7 @@ body::before {
 }
 
 .balance-amount {
-    font-size: clamp(2.5rem, 10vw, 4.5rem);
+    font-size: clamp(1.6rem, 4vw, 3rem);
     font-weight: 800;
     margin: 32px 0;
     font-family: 'Courier New', monospace;
@@ -483,11 +483,24 @@ body::before {
     filter: drop-shadow(0 3px 15px rgba(212, 175, 55, 0.8));
     position: relative;
     z-index: 1;
-    line-height: 1.1;
-    letter-spacing: -2px;
-    word-break: break-word;
-    hyphens: none;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    white-space: nowrap;
     text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    padding: 0 10px;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+.balance-amount .decimal-part {
+    font-size: 0.5em;
+    opacity: 0.8;
+    margin-left: 2px;
+    flex-shrink: 0;
 }
 
 .balance-currency {
@@ -612,18 +625,27 @@ body::before {
 }
 
 .wallet-balance {
-    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 800;
     font-family: 'Courier New', monospace;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: -1px;
-    word-break: break-word;
-    hyphens: none;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
     max-width: 100%;
     filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.5));
+    display: flex;
+    align-items: baseline;
+    overflow: visible;
+}
+
+.wallet-balance .decimal-part {
+    font-size: 0.6em;
+    opacity: 0.75;
+    margin-left: 1px;
+    flex-shrink: 0;
 }
 
 .wallet-currency {

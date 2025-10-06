@@ -27,21 +27,27 @@ export default async function handler(req, res) {
     }
     
     try {
-        // Extraer dirección de la URL
-        // URL format: /api/balance/nexa:nqt....
-        const address = req.query.address || extractAddressFromPath(req.url);
+        // Extraer dirección del query parameter
+        // URL format: /api/balance?address=nexa:nqt....
+        console.log('[API] req.query:', req.query);
+        
+        const address = req.query.address;
+        
+        console.log('[API] Extracted address:', address);
         
         if (!address) {
             return res.status(400).json({ 
                 error: 'Dirección no proporcionada',
-                usage: '/api/balance/:address'
+                usage: '/api/balance?address=YOUR_ADDRESS',
+                receivedQuery: req.query
             });
         }
         
         // Validar formato básico de dirección Nexa
         if (!address.startsWith('nexa:')) {
             return res.status(400).json({ 
-                error: 'Dirección inválida: debe comenzar con "nexa:"'
+                error: 'Dirección inválida: debe comenzar con "nexa:"',
+                receivedAddress: address
             });
         }
         
@@ -49,16 +55,15 @@ export default async function handler(req, res) {
         
         // Llamar a la API de Nexa
         // Formato correcto: /balance/address (no /v1/address/{address}/balance)
-        const nexaApiUrl = `https://nexaapi.deno.dev/balance/${encodeURIComponent(address)}`;
+        // La dirección ya viene encoded desde el frontend, no volver a encodear
+        const nexaApiUrl = `https://nexaapi.deno.dev/balance/${address}`;
         
         const response = await fetch(nexaApiUrl, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'User-Agent': 'nexaView-PWA/1.0'
-            },
-            // Timeout de 10 segundos
-            signal: AbortSignal.timeout(10000)
+            }
         });
         
         if (!response.ok) {
@@ -104,6 +109,8 @@ export default async function handler(req, res) {
         
     } catch (error) {
         console.error('[API] Error:', error);
+        console.error('[API] Error name:', error.name);
+        console.error('[API] Error message:', error.message);
         
         // Manejar timeout
         if (error.name === 'AbortError' || error.name === 'TimeoutError') {
@@ -116,6 +123,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ 
             error: 'Error al consultar el balance',
             message: error.message,
+            errorName: error.name,
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }

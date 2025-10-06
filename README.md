@@ -208,12 +208,12 @@ NEXA_API_URL=https://nexaapi.deno.dev
 The app uses a serverless proxy to avoid CORS issues:
 
 ```
-GET /api/balance/:address
+GET /api/balance?address=YOUR_ADDRESS
 ```
 
 **Example**:
 ```bash
-curl https://your-domain.vercel.app/api/balance/nexa:nqtsq5g5wfl0zrvgry8fyuuxmulmsved0kfg2qmx5w6vf760
+curl "https://your-domain.vercel.app/api/balance?address=nexa:nqtsq5g5wfl0zrvgry8fyuuxmulmsved0kfg2qmx5w6vf760"
 ```
 
 **Response**:
