@@ -69,6 +69,12 @@ body::before {
     margin-bottom: 15px;
     padding-top: 8px;
 }
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 
 /* Logo + título */
 .logo {

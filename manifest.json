@@ -2,7 +2,7 @@
   "name": "nexaView",
   "short_name": "nexaView",
   "description": "Check Nexa address balance in real-time",
-  "start_url": "/",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#d4af37",

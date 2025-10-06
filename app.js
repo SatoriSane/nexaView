@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
+
 function initializeApp() {
     console.log('nexaView PWA started');
     updateStatus('Ready', 'ready');
@@ -57,6 +58,50 @@ async function registerServiceWorker() {
         }
     }
 }
+// ===== PWA INSTALL BUTTON =====
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); // evita que el navegador muestre el prompt automáticamente
+    deferredPrompt = e;
+
+    // Crear botón solo si no existe
+    if (!document.getElementById('installBtn')) {
+        const header = document.querySelector('.header');
+        const installBtn = document.createElement('button');
+        installBtn.id = 'installBtn';
+        installBtn.textContent = 'Install NexaView';
+        installBtn.style.marginLeft = 'auto';
+        installBtn.style.padding = '0.4rem 0.8rem';
+        installBtn.style.fontSize = '0.9rem';
+        installBtn.style.cursor = 'pointer';
+        installBtn.style.background = '#d4af37';
+        installBtn.style.color = '#000';
+        installBtn.style.border = 'none';
+        installBtn.style.borderRadius = '6px';
+        installBtn.style.transition = '0.2s';
+        installBtn.addEventListener('mouseenter', () => installBtn.style.opacity = '0.8');
+        installBtn.addEventListener('mouseleave', () => installBtn.style.opacity = '1');
+
+        header.appendChild(installBtn);
+
+        installBtn.addEventListener('click', async () => {
+            installBtn.disabled = true;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('User choice:', outcome);
+            if (outcome === 'accepted') installBtn.style.display = 'none';
+            deferredPrompt = null;
+        });
+    }
+});
+
+// Ocultar botón si la app ya fue instalada
+window.addEventListener('appinstalled', () => {
+    console.log('PWA installed!');
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) installBtn.style.display = 'none';
+});
 
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
