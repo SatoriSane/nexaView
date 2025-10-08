@@ -68,6 +68,42 @@
 .subtitle {
     color: var(--text-secondary);
     font-size: 0.95rem;
-    margin: 4px 0 0 0; /* sin margen izquierdo extra */
+    margin: 4px 0 0 0;
 }
 
+/* ===== INSTALL APP BUTTON ===== */
+.install-app-btn {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--gold);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.install-app-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.install-app-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.install-app-btn:active {
+    transform: translateY(0);
+}
+
+.install-app-btn.hidden {
+    display: none;
+}

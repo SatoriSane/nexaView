@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v1.1.1';
+const CACHE_VERSION = 'nexaView-v2.0.0';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -16,10 +16,22 @@ self.addEventListener('message', (event) => {
 const STATIC_ASSETS = [
     '/',
     '/index.html',
-    '/style.css',
-    '/app.js',
-    '/manifest.json'
-    // Los iconos se cachearán dinámicamente cuando se soliciten
+    '/manifest.json',
+    '/css/base.css',
+    '/css/header.css',
+    '/css/input.css',
+    '/css/wallet.css',
+    '/css/footer.css',
+    '/css/notifications.css',
+    '/js/app.js',
+    '/js/config.js',
+    '/js/pwa.js',
+    '/js/ui.js',
+    '/js/wallets.js',
+    '/js/balanceClient.js',
+    '/nexa-logo.svg',
+    '/full-nexa-logo.svg'
+    // Los iconos PNG se cachearán dinámicamente
 ];
 
 // ===== INSTALACIÓN =====
@@ -93,8 +105,23 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
-    // Archivos críticos que SIEMPRE deben estar actualizados
-    const criticalFiles = ['/index.html', '/app.js', '/style.css', '/'];
+    // Archivos críticos que SIEMPRE deben estar actualizados (Network First)
+    const criticalFiles = [
+        '/index.html',
+        '/css/base.css',
+        '/css/header.css',
+        '/css/input.css',
+        '/css/wallet.css',
+        '/css/footer.css',
+        '/css/notifications.css',
+        '/js/app.js',
+        '/js/config.js',
+        '/js/pwa.js',
+        '/js/ui.js',
+        '/js/wallets.js',
+        '/js/balanceClient.js',
+        '/'
+    ];
     const isCritical = criticalFiles.some(file => url.pathname === file || url.pathname.endsWith(file));
     
     // Estrategia para API: Network First
