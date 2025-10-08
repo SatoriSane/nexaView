@@ -188,7 +188,7 @@
 }
 
 .wallet-balance {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
     -webkit-background-clip: text;
@@ -207,7 +207,7 @@
 
 /* ===== WALLET ADDRESS ===== */
 .wallet-address {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--text-secondary);
     font-family: 'Courier New', monospace;
     text-align: center;
@@ -256,36 +256,6 @@
     font-weight: 500;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 480px) {
-    .wallet-balance {
-        font-size: 1.5rem;
-    }
-    
-    .logo-icon-min {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .wallet-item {
-        padding: 16px;
-    }
-    
-    .wallet-balance-center {
-        padding: 20px 0;
-    }
-    
-    .section-header {
-        flex-direction: column;
-        gap: 12px;
-        align-items: flex-start;
-    }
-    
-    .text-btn {
-        width: 100%;
-        justify-content: center;
-    }
-}
 
 /* ===== ANIMACIONES DE ENTRADA ===== */
 @keyframes fadeInUp {
