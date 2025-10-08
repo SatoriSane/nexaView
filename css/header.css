@@ -2,15 +2,11 @@
 /* ===== HEADER ===== */
 .header {
     display: flex;
-    flex-direction: column; /* apila logo+titulo y subtítulo verticalmente */
-    align-items: center;    /* centra horizontalmente */
-    margin-bottom: 15px;
-    padding-top: 8px;
-}
-.header {
-    display: flex;
+    flex-direction: column; /* importante para apilar logo+título+subtítulo */
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /* opcional: centra verticalmente */
+    margin-bottom: 0px;     /* ajustable */
+    padding-top: 0px;
 }
 
 

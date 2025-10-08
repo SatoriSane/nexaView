@@ -121,7 +121,8 @@ export function renderTrackedWallets(elements) {
     if (!section || !list) return;
 
     if (state.savedWallets.length === 0) {
-        section.classList.add('hidden');
+        section.classList.remove('hidden');
+        list.innerHTML = createEmptyState();
         return;
     }
 
@@ -136,6 +137,29 @@ export function renderTrackedWallets(elements) {
         if (balanceEl) adjustBalanceFontSize(balanceEl);
     });
 }
+
+function createEmptyState() {
+    return `
+        <div class="empty-state">
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                <line x1="1" y1="10" x2="23" y2="10"></line>
+            </svg>
+            <h3 class="empty-state-title">No wallets tracked</h3>
+            <p class="empty-state-text">
+                Monitor your Nexa wallets from your phone 
+                while keeping your real funds stored safely offline — 
+                away from hackers and malicious apps.
+            </p>
+            <div class="empty-state-hint">
+                Tap<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>to add your first wallet
+            </div>
+        </div>
+    `;
+}
+
 
 /* ===================== REFRESH ALL ===================== */
 export async function refreshAllWallets(elements) {
