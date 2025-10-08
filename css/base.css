@@ -1,49 +1,45 @@
 /* ===== VARIABLES Y RESET ===== */
 :root {
-    --primary: #d4af37;
-    --primary-dark: #b8941f;
-    --primary-light: #f4d03f;
-    --gold: #d4af37;
-    --gold-dark: #b8941f;
-    --gold-light: #f4d03f;
-    --success: #10b981;
-    --error: #ef4444;
-    --warning: #f59e0b;
-    --bg-primary: #0a0a0a;
-    --bg-secondary: #1a1a1a;
-    --bg-card: #1a1a1a;
-    --text-primary: #f5f5f5;
-    --text-secondary: #a0a0a0;
-    --border: #2a2a2a;
-    --shadow: rgba(212, 175, 55, 0.15);
-}
-
-* {
+    /* Colores inspirados en Nexa - Dorado y Negro */
+     --primary: #d4af37;
+     --primary-dark: #b8941f;
+     --primary-light: #f4d03f;
+     --gold: #d4af37;
+     --gold-dark: #b8941f;
+     --gold-light: #f4d03f;
+     --success: #10b981;
+     --error: #ef4444;
+     --warning: #f59e0b;
+     --bg-primary: #0a0a0a;
+     --bg-secondary: #1a1a1a;
+     --bg-card: #1a1a1a;
+     --text-primary: #f5f5f5;
+     --text-secondary: #a0a0a0;
+     --border: #2a2a2a;
+     --shadow: rgba(212, 175, 55, 0.15);
+    }
+    * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-
-body {
+    }
+    body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: radial-gradient(ellipse at top, #1a1a1a 0%, var(--bg-primary) 100%);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
     color: var(--text-primary);
+    min-height: 100vh;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-}
-
+    }
 /* Evitar selección de texto en toda la app */
 body, .container, header, main, footer, button, svg, .section-title, .wallet-item {
     user-select: none;
-    -webkit-user-select: none; 
-    -moz-user-select: none;    
-    -ms-user-select: none;     
+    -webkit-user-select: none; /* Safari/Chrome */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+ */
 }
 
 /* Permitir seleccionar solo las direcciones de wallet */
@@ -54,7 +50,7 @@ body, .container, header, main, footer, button, svg, .section-title, .wallet-ite
     -ms-user-select: text;
 }
 
-/* Inputs y textareas */
+/* Opcional: permitir selección en inputs y textareas */
 input, textarea {
     user-select: text;
     -webkit-user-select: text;
@@ -62,40 +58,40 @@ input, textarea {
     -ms-user-select: text;
 }
 
-/* Efecto radial ligero en el fondo */
-body::before {
+    body::before {
     content: '';
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background:
-        radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
-}
-
-/* ===== CONTAINER ===== */
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    flex: 1; /* Empuja el footer al fondo automáticamente */
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 1;
-}
-
-/* ===== BUTTONS ===== */
-.action-buttons {
+    }
+    /* ===== CONTAINER ===== */
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        padding-bottom: 0px; /* o incluso 20px */
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 1;
+      }
+      
+    /* ===== BUTTONS ===== */
+    .action-buttons {
     display: flex;
     gap: 12px;
     margin-top: 12px;
     width: 100%;
-}
-
-/* Botones y FAB no cambian, los mantengo igual */
-.btn {
+    }
+    .btn {
     padding: 14px 24px;
     border: none;
     border-radius: 12px;
@@ -107,37 +103,43 @@ body::before {
     align-items: center;
     justify-content: center;
     gap: 8px;
-}
-.btn-primary {
+    }
+    .btn-primary {
     background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
     color: #000;
     font-weight: 700;
     box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
     border: 1px solid var(--gold-light);
-}
-.btn-primary:hover:not(:disabled) {
+    }
+    .btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 30px rgba(212, 175, 55, 0.6);
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
-}
-.btn-primary:active:not(:disabled) { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.btn-secondary {
+    }
+    .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    }
+    .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    }
+    .btn-secondary {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
     border: 1px solid var(--border);
     flex: 1;
-}
-.btn-secondary:hover:not(:disabled) {
+    }
+    .btn-secondary:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
     border-color: var(--text-secondary);
-}
-
-.btn-icon { width: 20px; height: 20px; }
-
-/* ===== FAB ===== */
-.fab {
+    }
+    .btn-icon {
+    width: 20px;
+    height: 20px;
+    }
+    
+    /* ===== FAB (Floating Action Button) ===== */
+    .fab {
     position: fixed;
     bottom: 24px;
     right: 24px;
@@ -155,9 +157,43 @@ body::before {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     opacity: 0.5;
-}
-.fab svg { width: 24px; height: 24px; stroke-width: 3; transition: transform 0.3s ease; }
-.fab:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 10px 36px rgba(212, 175, 55, 0.7); background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%); opacity: 0.75; }
-.fab:active { transform: translateY(-2px) scale(1); box-shadow: 0 6px 24px rgba(212, 175, 55, 0.5); }
-@keyframes fabEntry { from { transform: scale(0) rotate(-180deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
-.fab { animation: fabEntry 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    }
+    
+    .fab svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 3;
+    transition: transform 0.3s ease;
+    }
+    
+    .fab:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 36px rgba(212, 175, 55, 0.7);
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+    opacity: 0.75;
+    }
+    
+
+    
+    .fab:active {
+    transform: translateY(-2px) scale(1);
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.5);
+    }
+    
+    /* Animación de entrada del FAB */
+    @keyframes fabEntry {
+    from {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+    }
+    to {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+    }
+    }
+    
+    .fab {
+    animation: fabEntry 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    

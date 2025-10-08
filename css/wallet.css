@@ -1,8 +1,11 @@
 /* ===== TRACKED WALLETS SECTION ===== */
 .tracked-wallets-section {
-    margin-top: 40px;
-    margin-bottom: 60px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
+
 
 .tracked-wallets-section.hidden {
     display: none;
@@ -63,12 +66,15 @@
     transform: translateY(0);
 }
 
-/* ===== WALLETS LIST ===== */
+/* ===== WALLET LIST MIN-HEIGHT ===== */
 .tracked-wallets-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    min-height: 150px; /* evita colapso al agregar la primera wallet */
 }
+
+
 
 /* ===== WALLET CARD ===== */
 .wallet-item {
