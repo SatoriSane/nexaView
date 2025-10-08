@@ -207,9 +207,8 @@
     color: var(--gold); /* for Firefox y otros navegadores */
   }
 
-/* ===== WALLET ADDRESS ===== */
-.wallet-address {
-    font-size: 0.625rem;
+  .wallet-address {
+    font-size: 0.825rem;
     color: var(--text-secondary);
     font-family: 'Courier New', monospace;
     text-align: center;
@@ -217,8 +216,13 @@
     background: rgba(255, 255, 255, 0.02);
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
     transition: all 0.2s ease;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
 }
 
 .wallet-address:hover {
@@ -226,6 +230,7 @@
     border-color: rgba(212, 175, 55, 0.3);
     color: var(--text-primary);
 }
+
 
 /* ===== LOADING CARD ===== */
 .loading-card {

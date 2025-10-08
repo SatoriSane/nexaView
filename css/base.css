@@ -34,6 +34,30 @@
     -webkit-font-smoothing: antialiased;
     position: relative;
     }
+/* Evitar selección de texto en toda la app */
+body, .container, header, main, footer, button, svg, .section-title, .wallet-item {
+    user-select: none;
+    -webkit-user-select: none; /* Safari/Chrome */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+ */
+}
+
+/* Permitir seleccionar solo las direcciones de wallet */
+.wallet-address {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+/* Opcional: permitir selección en inputs y textareas */
+input, textarea {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
     body::before {
     content: '';
     position: fixed;

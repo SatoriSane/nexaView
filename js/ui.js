@@ -41,3 +41,32 @@ export function adjustBalanceFontSize(element) {
         }
     });
 }
+
+/**
+ * Trunca una wallet address centralmente, dejando visibles inicio y fin,
+ * y usando "..." si no cabe todo en el contenedor.
+ * @param {HTMLElement} element - Elemento donde mostrar la wallet
+ * @param {string} address - Wallet completa
+ */
+export function truncateWalletAddress(element, fullAddress) {
+    if (!element || !fullAddress) return;
+
+    const containerWidth = element.offsetWidth;
+    element.textContent = fullAddress;
+
+    // Si cabe completo, no hacemos nada
+    if (element.scrollWidth <= containerWidth) return;
+
+    let startLen = fullAddress.length - 4; // Conservamos los últimos 4 caracteres
+    let truncated = fullAddress;
+
+    // Reducimos los caracteres del medio hasta que quepa
+    while (element.scrollWidth > containerWidth && startLen > 1) {
+        const firstPart = fullAddress.slice(0, startLen);
+        const lastPart = fullAddress.slice(-4);
+        truncated = `${firstPart}…${lastPart}`;
+        element.textContent = truncated;
+        startLen--;
+    }
+}
+

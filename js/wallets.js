@@ -1,7 +1,7 @@
 import { CONFIG, state } from './config.js';
 import { formatBalance, formatTime, fetchBalance } from './balanceClient.js';
 import { adjustBalanceFontSize } from './ui.js';
-
+import { truncateWalletAddress } from './ui.js';
 /* ===================== LOAD & SAVE ===================== */
 export function loadSavedWallets(elements) {
     try {
@@ -48,14 +48,23 @@ export function renderWalletCard({ address, balance, timestamp }, elements) {
             <img src="./nexa-logo.svg" class="logo-icon-min">
             <span class="wallet-balance">${formatBalance(balance)}</span>
         </div>
-        <div class="wallet-address">${address}</div>
+        <div class="wallet-address"></div>
     `;
 
-    // 🔑 Añadir listeners aquí directamente
-    attachWalletListeners(wrapper, { address, balance, timestamp }, elements);
+    const addressEl = wrapper.querySelector('.wallet-address');
 
+    // Ejecutar truncamiento una vez que el elemento tenga ancho calculado
+    requestAnimationFrame(() => truncateWalletAddress(addressEl, address));
+
+    // Opcional: listener único para redimensionar (mejor manejarlo a nivel de toda la lista)
+    window.addEventListener('resize', () => truncateWalletAddress(addressEl, address));
+
+    attachWalletListeners(wrapper, { address, balance, timestamp }, elements);
     return wrapper;
 }
+
+
+
 
 /* ===================== ATTACH LISTENERS ===================== */
 function attachWalletListeners(item, wallet, elements) {
