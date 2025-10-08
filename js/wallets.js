@@ -45,6 +45,7 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
             </div>
         </div>
         <div class="wallet-balance-center">
+            <img src="./nexa-logo.svg" class="logo-icon-min">
             <span class="wallet-balance">${formatBalance(wallet.balance)}</span>
         </div>
         <div class="wallet-address" data-full-address="${wallet.address}">${wallet.address}</div>
