@@ -40,7 +40,7 @@ export function renderWalletCard({ address, balance, timestamp }, elements) {
         <div class="wallet-top">
             <div class="wallet-updated">Updated: ${formatTime(timestamp || Date.now())}</div>
             <div class="wallet-actions">
-                <button class="wallet-btn refresh-wallet" title="Refresh">⟳</button>
+                <button class="wallet-btn refresh-wallet" title="Refresh">↻</button>
                 <button class="wallet-btn delete-wallet" title="Delete">✖</button>
             </div>
         </div>
@@ -109,7 +109,7 @@ function attachWalletListeners(item, wallet, elements) {
     if (deleteBtn) {
         deleteBtn.addEventListener('click', e => {
             e.stopPropagation();
-            if (confirm('Delete this wallet?')) deleteWallet(wallet.address, elements);
+            showDeleteConfirmation(wallet.address, elements);
         });
     }
 }
@@ -147,9 +147,8 @@ function createEmptyState() {
             </svg>
             <h3 class="empty-state-title">No wallets tracked</h3>
             <p class="empty-state-text">
-                Monitor your Nexa wallets from your phone 
-                while keeping your real funds stored safely offline — 
-                away from hackers and malicious apps.
+                Monitor your Nexa wallets anywhere 
+                while keeping your real funds stored safely.
             </p>
             <div class="empty-state-hint">
                 Tap<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -186,6 +185,30 @@ export async function refreshAllWallets(elements) {
     
     // Re-renderizar todas las wallets (esto quita automáticamente el loading)
     renderTrackedWallets(elements);
+}
+
+/* ===================== DELETE CONFIRMATION ===================== */
+function showDeleteConfirmation(address, elements) {
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmAddress = document.getElementById('confirmAddress');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    
+    if (!confirmModal || !confirmAddress || !confirmDeleteBtn) return;
+    
+    // Mostrar dirección
+    confirmAddress.textContent = address;
+    
+    // Mostrar modal
+    confirmModal.classList.remove('hidden');
+    
+    // Crear nuevo listener para evitar duplicados
+    const newDeleteBtn = confirmDeleteBtn.cloneNode(true);
+    confirmDeleteBtn.parentNode.replaceChild(newDeleteBtn, confirmDeleteBtn);
+    
+    newDeleteBtn.addEventListener('click', () => {
+        deleteWallet(address, elements);
+        confirmModal.classList.add('hidden');
+    });
 }
 
 /* ===================== HELPERS ===================== */

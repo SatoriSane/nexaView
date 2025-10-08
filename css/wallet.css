@@ -328,6 +328,7 @@
 .empty-state-hint svg {
     width: 21px;
     height: 21px;
+    opacity: 0.5;
     stroke-width: 3;
     transition: transform 0.3s ease;
     background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);

@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v2.0.1';
+const CACHE_VERSION = 'nexaView-v2.4.0';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -23,6 +23,7 @@ const STATIC_ASSETS = [
     '/css/wallet.css',
     '/css/footer.css',
     '/css/notifications.css',
+    '/css/modal.css',
     '/js/app.js',
     '/js/config.js',
     '/js/pwa.js',
@@ -114,6 +115,7 @@ self.addEventListener('fetch', (event) => {
         '/css/wallet.css',
         '/css/footer.css',
         '/css/notifications.css',
+        '/css/modal.css',
         '/js/app.js',
         '/js/config.js',
         '/js/pwa.js',
