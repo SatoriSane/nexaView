@@ -1,3 +1,4 @@
+//api/balance.js
 // ===== SERVERLESS FUNCTION PARA VERCEL =====
 // Proxy para consultar la API de Nexa y evitar problemas de CORS
 
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
     
     try {
         // Extraer dirección del query parameter
-        // URL format: /api/balance?address=nexa:nqt....
+        // URL format: /api/balance?address=nexa:nqt....fetch
         console.log('[API] req.query:', req.query);
         
         const address = req.query.address;

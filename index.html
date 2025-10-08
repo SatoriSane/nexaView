@@ -6,15 +6,20 @@
     <meta name="description" content="Check Nexa address balance in real-time">
     <meta name="theme-color" content="transparent">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        
+
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
     <link rel="apple-touch-icon" href="/icons/icon-512x512.png">
-    
+
     <title>nexaView - Nexa Balance Checker</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/input.css">
+    <link rel="stylesheet" href="/css/wallet.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/notifications.css">
 </head>
 <body>
     <div class="container">
@@ -26,19 +31,10 @@
             </div>
             <p class="subtitle">View Nexa Wallet Balances (Read-Only)</p>
         </header>
-        
 
-        <!-- Main Card -->
-        <main class="card">
-            <!-- Add Wallet Button -->
-            <button id="addWalletBtn" class="btn btn-primary btn-add">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"/>
-                </svg>
-                Track wallet
-            </button>
-
-            <!-- Input Section (Hidden by default) -->
+        <!-- Main -->
+        <main>
+            <!-- Input Section -->
             <div id="inputSection" class="input-section hidden">
                 <label for="addressInput" class="label">Enter Nexa Address</label>
                 <div class="input-group">
@@ -46,7 +42,7 @@
                         type="text" 
                         id="addressInput" 
                         class="input" 
-                        placeholder="nexa:nqtsq5g5wfl0zrvgry8fyuuxmulmsved0kfg2qmx5w6vf760"
+                        placeholder="nexa:..."
                         autocomplete="off"
                         spellcheck="false"
                     >
@@ -57,44 +53,33 @@
                         </svg>
                     </button>
                 </div>
-                
-                <!-- Error Message -->
+
                 <div id="errorMessage" class="error-message hidden"></div>
 
-                <!-- Action Buttons -->
                 <div class="action-buttons">
-                    <button id="cancelBtn" class="btn btn-secondary">
-                        Cancel
-                    </button>
+                    <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
                     <button id="checkBalanceBtn" class="btn btn-primary">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M5 13l4 4L19 7"/>
                         </svg>
-                        View Balance
+                        Track
                     </button>
-
                 </div>
             </div>
 
-            <!-- Current Balance Display (same style as saved wallets) -->
-            <div id="balanceSection" class="balance-section hidden">
-                <div id="currentWalletCard" class="wallet-item current-wallet">
-                    <!-- Content will be populated by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Saved Wallets List -->
-            <div id="savedWalletsSection" class="saved-wallets-section hidden">
+            <!-- Tracked Wallets -->
+             
+            <div id="trackedWalletsSection" class="tracked-wallets-section hidden">
                 <div class="section-header">
-                    <h3 class="section-title">Saved Wallets</h3>
+                    <h3 class="section-title">Tracked Wallets</h3>
                     <button id="refreshAllBtn" class="text-btn" title="Refresh all balances">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.13-3.36L23 10M1 14l5.37 4.36A9 9 0 0 0 20.49 15"/>
                         </svg>
                         Refresh All
                     </button>
                 </div>
-                <div id="savedWalletsList" class="saved-wallets-list"></div>
+                <div id="trackedWalletsList" class="tracked-wallets-list"></div>
             </div>
         </main>
 
@@ -104,10 +89,8 @@
                 <span class="status-indicator" id="statusIndicator"></span>
                 <span id="statusText">Ready</span>
             </p>
-            <p class="footer-note">
-                Public query only • No private information required
-            </p>
-            <!-- Update notification (hidden by default) -->
+            <p class="footer-note">Public query only • No private information required</p>
+
             <div id="updateNotification" class="update-notification hidden">
                 <span>New version available!</span>
                 <button id="updateBtn" class="update-btn">Update Now</button>
@@ -115,11 +98,20 @@
         </footer>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="spinner-large"></div>
-    </div>
 
-    <script src="/app.js"></script>
+    <!-- JavaScript Modules -->
+    <script type="module">
+        import './js/config.js';
+        import './js/pwa.js';
+        import './js/ui.js';
+        import './js/wallets.js';
+        import './js/balanceClient.js';
+        import './js/app.js';
+    </script>
+    <button id="addWalletBtn" class="fab" title="Add wallet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+    </button>
 </body>
 </html>

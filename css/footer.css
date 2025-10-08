@@ -1,0 +1,121 @@
+/* ===== FOOTER ===== */
+.footer {
+    text-align: center;
+    margin-top: auto; /* 🔑 Esto empuja el footer al fondo */
+    padding: 20px 0 40px 0; /* Más padding abajo para separarlo del borde */
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    }
+    
+    .footer p {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    }
+    
+    .status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: inline-block;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 8px var(--gold);
+    }
+    
+    @keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(0.95);
+    }
+    }
+    
+    .status-indicator.error {
+    background: var(--error);
+    box-shadow: 0 0 8px var(--error);
+    }
+    
+    .status-indicator.loading {
+    background: var(--warning);
+    box-shadow: 0 0 8px var(--warning);
+    }
+    
+    .footer-note {
+    opacity: 0.7;
+    font-size: 0.8rem;
+    }
+    
+    /* ===== UPDATE NOTIFICATION ===== */
+    .update-notification {
+    margin-top: 16px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+    }
+    
+    .update-notification.hidden {
+    display: none;
+    }
+    
+    .update-notification span {
+    color: #000;
+    font-weight: 700;
+    font-size: 0.9rem;
+    }
+    
+    .update-btn {
+    background: #000;
+    color: var(--gold);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    }
+    
+    .update-btn:hover {
+    background: #1a1a1a;
+    transform: scale(1.05);
+    }
+    
+    @keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+    .footer {
+        padding: 16px 0 32px 0;
+        font-size: 0.8rem;
+    }
+    
+    .update-notification {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .update-btn {
+        width: 100%;
+    }
+    }

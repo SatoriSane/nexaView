@@ -1,0 +1,73 @@
+
+/* ===== HEADER ===== */
+.header {
+    display: flex;
+    flex-direction: column; /* apila logo+titulo y subtítulo verticalmente */
+    align-items: center;    /* centra horizontalmente */
+    margin-bottom: 15px;
+    padding-top: 8px;
+}
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* Logo + título */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* espacio entre logo y título */
+}
+
+/* Logo SVG */
+.logo-icon {
+    width: 182px;
+    height: 56px;
+}
+.logo-icon-min {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+/* Título */
+.logo h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+
+    position: relative;    /* para poder mover con left */
+}
+
+
+/* Título */
+.text-container h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+/* Subtítulo: alineado con el inicio del texto, no con el borde del logo */
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 4px 0 0 0; /* sin margen izquierdo extra */
+}
+
