@@ -122,6 +122,7 @@ self.addEventListener('fetch', (event) => {
         '/js/ui.js',
         '/js/wallets.js',
         '/js/balanceClient.js',
+        '/js/add-wallet-modal.js',
         '/'
     ];
     const isCritical = criticalFiles.some(file => url.pathname === file || url.pathname.endsWith(file));
