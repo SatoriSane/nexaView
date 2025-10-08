@@ -41,7 +41,9 @@ body, .container, header, main, footer, button, svg, .section-title, .wallet-ite
     -moz-user-select: none;    /* Firefox */
     -ms-user-select: none;     /* IE10+ */
 }
-
+main {
+    padding-bottom: calc(56px + 16px); /* altura footer + gap */
+}
 /* Permitir seleccionar solo las direcciones de wallet */
 .wallet-address {
     user-select: text;
