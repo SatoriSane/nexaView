@@ -33,7 +33,7 @@
 }
 
 /* ===== TEXT BUTTON (Refresh All) ===== */
-.text-btn {
+.refresh-all-btn {
     background: rgba(212, 175, 55, 0.1);
     color: var(--gold);
     border: 1px solid rgba(212, 175, 55, 0.3);
@@ -48,18 +48,18 @@
     gap: 8px;
 }
 
-.text-btn svg {
+.refresh-all-btn svg {
     width: 16px;
     height: 16px;
 }
 
-.text-btn:hover {
+.refresh-all-btn:hover {
     background: rgba(212, 175, 55, 0.2);
     border-color: var(--gold);
     transform: translateY(-1px);
 }
 
-.text-btn:active {
+.refresh-all-btn:active {
     transform: translateY(0);
 }
 
@@ -150,13 +150,13 @@
     color: var(--gold);
 }
 
-.wallet-btn.refresh-wallet.loading {
-    animation: rotate 0.8s linear infinite;
-    pointer-events: none;
-    color: var(--gold);
-    border-color: var(--gold);
-    background: rgba(212, 175, 55, 0.1);
+.refresh-wallet .refresh-icon.loading {
+    animation: spin 1s linear infinite;
 }
+#refreshAllBtn .refresh-icon.loading {
+    animation: spin 1s linear infinite;
+}
+
 
 @keyframes rotate {
     from {
@@ -248,9 +248,16 @@
     animation: spin 0.8s linear infinite;
 }
 
+/* Animación de giro */
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
+
+.refresh-wallet .refresh-icon.loading {
+    animation: spin 1s linear infinite;
+}
+
 
 .wallet-loading-text {
     color: var(--text-secondary);

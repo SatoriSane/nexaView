@@ -40,12 +40,16 @@
              
             <div id="trackedWalletsSection" class="tracked-wallets-section hidden">
                 <div class="section-header">
-                    <h3 class="section-title">View-Only Wallets</h3>                    <button id="refreshAllBtn" class="text-btn" title="Refresh all balances">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.13-3.36L23 10M1 14l5.37 4.36A9 9 0 0 0 20.49 15"/>
-                        </svg>
+                    <h3 class="section-title">View-Only Wallets</h3>                    
+                    <button id="refreshAllBtn" class="refresh-all-btn" title="Refresh all balances">
+                        <span class="refresh-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.13-3.36L23 10M1 14l5.37 4.36A9 9 0 0 0 20.49 15"/>
+                            </svg>
+                        </span>
                         Refresh All
                     </button>
+                    
                 </div>
                 <div id="trackedWalletsList" class="tracked-wallets-list"></div>
             </div>

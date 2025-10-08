@@ -40,7 +40,7 @@ export function renderWalletCard({ address, balance, timestamp }, elements) {
         <div class="wallet-top">
             <div class="wallet-updated">Updated: ${formatTime(timestamp || Date.now())}</div>
             <div class="wallet-actions">
-                <button class="wallet-btn refresh-wallet" title="Refresh">↻</button>
+                <button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>
                 <button class="wallet-btn delete-wallet" title="Delete">✖</button>
             </div>
         </div>
@@ -70,7 +70,8 @@ function attachWalletListeners(item, wallet, elements) {
             if (refreshBtn.classList.contains('loading')) return;
             
             // 🔄 Añadir clase loading para rotar el botón
-            refreshBtn.classList.add('loading');
+            const icon = refreshBtn.querySelector('.refresh-icon');
+            icon.classList.add('loading');
             refreshBtn.disabled = true;
 
             const balance = await fetchBalance(wallet.address);
@@ -101,7 +102,7 @@ function attachWalletListeners(item, wallet, elements) {
             }
             
             // Quitar clase loading
-            refreshBtn.classList.remove('loading');
+            icon.classList.remove('loading');
             refreshBtn.disabled = false;
         });
     }
@@ -165,14 +166,19 @@ export async function refreshAllWallets(elements) {
     const list = elements.trackedWalletsList;
     if (!list) return;
 
-    // Obtener todos los botones de refresh y añadir clase loading
-    const refreshButtons = list.querySelectorAll('.refresh-wallet');
-    refreshButtons.forEach(btn => {
-        btn.classList.add('loading');
-        btn.disabled = true;
+    // Ícono del botón "Refresh All"
+    const refreshAllIcon = elements.refreshAllBtn.querySelector('.refresh-icon');
+    if (refreshAllIcon) refreshAllIcon.classList.add('loading');
+    elements.refreshAllBtn.disabled = true;
+
+    // Todos los íconos individuales de wallets
+    const refreshIcons = list.querySelectorAll('.refresh-wallet .refresh-icon');
+    refreshIcons.forEach(icon => {
+        icon.classList.add('loading');
+        icon.closest('.refresh-wallet').disabled = true;
     });
 
-    // Actualizar todas las wallets
+    // Actualizar balances
     for (const wallet of state.savedWallets) {
         const balance = await fetchBalance(wallet.address);
         if (balance !== null) {
@@ -183,9 +189,16 @@ export async function refreshAllWallets(elements) {
 
     localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
     
-    // Re-renderizar todas las wallets (esto quita automáticamente el loading)
+    // Re-renderizar todas las wallets
     renderTrackedWallets(elements);
+
+    // Quitar animaciones y habilitar botones
+    if (refreshAllIcon) refreshAllIcon.classList.remove('loading');
+    elements.refreshAllBtn.disabled = false;
+
+    list.querySelectorAll('.refresh-wallet').forEach(btn => btn.disabled = false);
 }
+
 
 /* ===================== DELETE CONFIRMATION ===================== */
 function showDeleteConfirmation(address, elements) {
