@@ -38,10 +38,10 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
 
     card.innerHTML = `
         <div class="wallet-top">
-            <div class="wallet-updated">${isPreview ? '' : formatTime(wallet.timestamp)}</div>
+            <div class="wallet-updated">Updated: ${formatTime(wallet.timestamp)}</div>
             <div class="wallet-actions">
                 <button class="wallet-btn delete-wallet" title="Delete">✖</button>
-                ${isPreview ? '' : '<button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>'}
+                ${'<button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>'}
             </div>
         </div>
         <div class="wallet-balance-center">
@@ -62,7 +62,7 @@ function attachWalletListeners(item, wallet, elements, isPreview = false) {
     const deleteBtn = item.querySelector('.delete-wallet');
     const addressEl = item.querySelector('.wallet-address');
 
-    if (refreshBtn && !isPreview) {
+    if (refreshBtn) {
         refreshBtn.addEventListener('click', async e => {
             e.stopPropagation();
             if (refreshBtn.classList.contains('loading')) return;
