@@ -198,17 +198,27 @@ function showDeleteConfirmation(address, elements) {
     const confirmModal = document.getElementById('confirmModal');
     const confirmAddress = document.getElementById('confirmAddress');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 
-    if (!confirmModal || !confirmAddress || !confirmDeleteBtn) return;
+    if (!confirmModal || !confirmAddress || !confirmDeleteBtn || !confirmCancelBtn) return;
 
+    // Mostrar dirección en el modal
     confirmAddress.textContent = address;
     confirmModal.classList.remove('hidden');
 
+    // ===== DELETE BUTTON =====
     const newDeleteBtn = confirmDeleteBtn.cloneNode(true);
     confirmDeleteBtn.parentNode.replaceChild(newDeleteBtn, confirmDeleteBtn);
-
     newDeleteBtn.addEventListener('click', () => {
         deleteWallet(address, elements);
         confirmModal.classList.add('hidden');
     });
+
+    // ===== CANCEL BUTTON =====
+    const newCancelBtn = confirmCancelBtn.cloneNode(true);
+    confirmCancelBtn.parentNode.replaceChild(newCancelBtn, confirmCancelBtn);
+    newCancelBtn.addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+    });
 }
+
