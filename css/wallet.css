@@ -188,7 +188,7 @@
 }
 
 .wallet-balance {
-    font-size: 2.5rem;
+    font-size: 2.3rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
     -webkit-background-clip: text;
@@ -207,7 +207,7 @@
 
 /* ===== WALLET ADDRESS ===== */
 .wallet-address {
-    font-size: 0.6rem;
+    font-size: 0.625rem;
     color: var(--text-secondary);
     font-family: 'Courier New', monospace;
     text-align: center;
