@@ -4,59 +4,74 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-bottom: 32px;
-    padding: 16px 0;
+    margin-bottom: 0;
+    padding: 0 0 0;
     text-align: center;
+    position: relative;
 }
 
 /* Logo + título */
 .logo {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-end; /* ↓ clave: alinear base con el texto */
+    gap: 8px;
+    line-height: 1; /* evita espacio extra vertical */
 }
 
 /* Logo SVG */
 .logo-icon {
-    width: 160px;
+    width: 145px; /* un poco más compacto */
     height: auto;
-}
-.logo-icon-min {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
+    transform: translateY(2px); /* ajusta visualmente */
 }
 
 /* Título principal */
 .logo h1 {
-    font-size: 2.4rem;
+    font-size: 2.1rem;
     font-weight: 800;
     margin: 0;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: 1px;
-    text-shadow: 0 0 8px rgba(212, 175, 55, 0.25); /* sutil, elegante */
+    letter-spacing: 0.6px;
+    text-shadow: 0 0 6px rgba(212, 175, 55, 0.15);
+    line-height: 1;
 }
 
 /* Subtítulo */
 .subtitle {
-    font-size: 0.95rem;
-    font-weight: 500;
-    margin-top: 6px;
+    font-size: 0.92rem;
+    font-weight: 400;
+    margin-top: 4px; /* antes 6px → más compacto */
     color: var(--text-secondary);
     letter-spacing: 0.3px;
+    opacity: 0.9;
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", sans-serif;
+    position: relative;
+    padding-bottom: 10px;
 }
 
-/* Entrada suave */
+/* Línea elegante debajo del subtítulo */
+.subtitle::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 1px;
+    margin: 8px auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    opacity: 0.5;
+    border-radius: 2px;
+}
+
+/* Animación suave */
 .header {
-    animation: fadeInDown 0.6s ease-out;
+    animation: fadeInDown 0.5s ease-out;
 }
 
 @keyframes fadeInDown {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-8px);
     }
     to {
         opacity: 1;
