@@ -1,21 +1,21 @@
 /* ===== FOOTER ===== */
 .footer {
     text-align: center;
-    margin-top: auto; /* 🔑 Esto empuja el footer al fondo */
-    padding: 20px 0 40px 0; /* Más padding abajo para separarlo del borde */
+    margin-top: auto; /* Empuja el footer al fondo */
+    padding: 20px 0 24px 0; /* Reducido para no generar scroll innecesario */
     color: var(--text-secondary);
     font-size: 0.85rem;
-    }
-    
-    .footer p {
+}
+
+.footer p {
     margin: 8px 0;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    }
-    
-    .status-indicator {
+}
+
+.status-indicator {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -23,9 +23,9 @@
     display: inline-block;
     animation: pulse 2s infinite;
     box-shadow: 0 0 8px var(--gold);
-    }
-    
-    @keyframes pulse {
+}
+
+@keyframes pulse {
     0%, 100% {
         opacity: 1;
         transform: scale(1);
@@ -34,25 +34,25 @@
         opacity: 0.6;
         transform: scale(0.95);
     }
-    }
-    
-    .status-indicator.error {
+}
+
+.status-indicator.error {
     background: var(--error);
     box-shadow: 0 0 8px var(--error);
-    }
-    
-    .status-indicator.loading {
+}
+
+.status-indicator.loading {
     background: var(--warning);
     box-shadow: 0 0 8px var(--warning);
-    }
-    
-    .footer-note {
+}
+
+.footer-note {
     opacity: 0.7;
     font-size: 0.8rem;
-    }
-    
-    /* ===== UPDATE NOTIFICATION ===== */
-    .update-notification {
+}
+
+/* ===== UPDATE NOTIFICATION ===== */
+.update-notification {
     margin-top: 16px;
     padding: 12px 20px;
     background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
@@ -63,19 +63,19 @@
     gap: 12px;
     animation: slideUp 0.3s ease;
     box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
-    }
-    
-    .update-notification.hidden {
+}
+
+.update-notification.hidden {
     display: none;
-    }
-    
-    .update-notification span {
+}
+
+.update-notification span {
     color: #000;
     font-weight: 700;
     font-size: 0.9rem;
-    }
-    
-    .update-btn {
+}
+
+.update-btn {
     background: #000;
     color: var(--gold);
     border: none;
@@ -85,43 +85,34 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.85rem;
-    }
-    
-    .update-btn:hover {
+}
+
+.update-btn:hover {
     background: #1a1a1a;
     transform: scale(1.05);
-    }
-    
-    @keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    }
-    
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 480px) {
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
     .footer {
-        padding: 16px 0 32px 0;
+        padding: 16px 0 20px 0; /* Menos padding para móviles */
         font-size: 0.8rem;
     }
-    
     .update-notification {
         flex-direction: column;
         gap: 8px;
     }
-    
     .update-btn {
         width: 100%;
     }
-    }
+}
 
-
-    /* ===== INSTALL APP BUTTON ===== */
+/* ===== INSTALL APP BUTTON ===== */
 .install-app-btn {
     background: rgba(212, 175, 55, 0.1);
     border: 1px solid rgba(212, 175, 55, 0.3);
@@ -135,7 +126,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin: 0 auto; /* centrado horizontal */}
+    margin: 0 auto;
+}
 
 .install-app-btn svg {
     width: 18px;

@@ -20,14 +20,14 @@
 
 /* Logo SVG */
 .logo-icon {
-    width: 185px; /* un poco más compacto */
+    width: 172px; /* un poco más compacto */
     height: auto;
     transform: translateY(2px); /* ajusta visualmente */
 }
 
 /* Título principal */
 .logo h1 {
-    font-size: 2.35rem;
+    font-size: 2.3rem;
     font-weight: 800;
     margin: 0;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
@@ -39,19 +39,20 @@
 
 
 /* Subtítulo (versión refinada y elegante) */
+/* Subtítulo (elegante y confiable) */
 .subtitle {
-    font-size: 0.93rem;
-    font-weight: 400;
-    margin-top: 7px;
+    font-size: 0.94rem;
+    font-weight: 500;
+    margin-top: 8px;
     color: var(--text-secondary);
-    letter-spacing: 0.4px;
-    opacity: 0.85;
-    font-family: "Poppins", "Inter", "Segoe UI", "Helvetica Neue", sans-serif;
-    font-style: italic;
+    letter-spacing: 0.35px;
+    opacity: 0.9;
+    font-family: "Inter", "Poppins", "Segoe UI", "Helvetica Neue", sans-serif;
     position: relative;
-    padding-bottom: 8px;
-    text-shadow: 0 0 4px rgba(212, 175, 55, 0.08);
+    padding-bottom: 10px;
+    text-shadow: 0 0 3px rgba(212, 175, 55, 0.05);
 }
+
 
 
 /* Línea elegante debajo del subtítulo */
