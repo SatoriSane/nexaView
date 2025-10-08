@@ -1,7 +1,7 @@
 import { CONFIG, state } from './config.js';
 import { formatBalance, formatTime, fetchBalance } from './balanceClient.js';
-import { adjustBalanceFontSize } from './ui.js';
-import { truncateWalletAddress } from './ui.js';
+import { adjustBalanceFontSize, setupWalletAddressToggle, truncateWalletAddress } from './ui.js';
+
 /* ===================== LOAD & SAVE ===================== */
 export function loadSavedWallets(elements) {
     try {
@@ -31,86 +31,63 @@ export function deleteWallet(address, elements) {
     renderTrackedWallets(elements);
 }
 
-/* ===================== RENDER ===================== */
-export function renderWalletCard({ address, balance, timestamp }, elements) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "wallet-item";
+/* ===================== RENDER WALLET ===================== */
+export function renderWalletCard(wallet, elements, isPreview = false) {
+    const card = document.createElement('div');
+    card.className = 'wallet-item';
 
-    wrapper.innerHTML = `
+    card.innerHTML = `
         <div class="wallet-top">
-            <div class="wallet-updated">Updated: ${formatTime(timestamp || Date.now())}</div>
+            <div class="wallet-updated">${isPreview ? '' : formatTime(wallet.timestamp)}</div>
             <div class="wallet-actions">
-                <button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>
                 <button class="wallet-btn delete-wallet" title="Delete">✖</button>
+                ${isPreview ? '' : '<button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>'}
             </div>
         </div>
         <div class="wallet-balance-center">
-            <img src="./nexa-logo.svg" class="logo-icon-min">
-            <span class="wallet-balance">${formatBalance(balance)}</span>
+            <span class="wallet-balance">${formatBalance(wallet.balance)}</span>
         </div>
-        <div class="wallet-address"></div>
+        <div class="wallet-address" data-full-address="${wallet.address}">${wallet.address}</div>
     `;
 
-    const addressEl = wrapper.querySelector('.wallet-address');
+    attachWalletListeners(card, wallet, elements, isPreview);
 
-    // Ejecutar truncamiento una vez que el elemento tenga ancho calculado
-    requestAnimationFrame(() => truncateWalletAddress(addressEl, address));
-
-    // Opcional: listener único para redimensionar (mejor manejarlo a nivel de toda la lista)
-    window.addEventListener('resize', () => truncateWalletAddress(addressEl, address));
-
-    attachWalletListeners(wrapper, { address, balance, timestamp }, elements);
-    return wrapper;
+    return card;
 }
 
-
-
-
 /* ===================== ATTACH LISTENERS ===================== */
-function attachWalletListeners(item, wallet, elements) {
+function attachWalletListeners(item, wallet, elements, isPreview = false) {
     const refreshBtn = item.querySelector('.refresh-wallet');
     const deleteBtn = item.querySelector('.delete-wallet');
+    const addressEl = item.querySelector('.wallet-address');
 
-    if (refreshBtn) {
+    if (refreshBtn && !isPreview) {
         refreshBtn.addEventListener('click', async e => {
             e.stopPropagation();
-            
-            // Evitar múltiples clicks mientras carga
             if (refreshBtn.classList.contains('loading')) return;
-            
-            // 🔄 Añadir clase loading para rotar el botón
+
             const icon = refreshBtn.querySelector('.refresh-icon');
             icon.classList.add('loading');
             refreshBtn.disabled = true;
 
             const balance = await fetchBalance(wallet.address);
-            
             if (balance !== null) {
                 wallet.balance = balance;
                 wallet.timestamp = Date.now();
-                
-                // Actualizar en el array global
+
                 const index = state.savedWallets.findIndex(w => w.address === wallet.address);
-                if (index !== -1) {
-                    state.savedWallets[index] = wallet;
-                }
-                
+                if (index !== -1) state.savedWallets[index] = wallet;
                 localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
-                
-                // Actualizar solo el balance y timestamp en el DOM
+
                 const balanceEl = item.querySelector('.wallet-balance');
                 const updatedEl = item.querySelector('.wallet-updated');
-                
                 if (balanceEl) {
-                    balanceEl.innerHTML = formatBalance(balance); // Usar innerHTML para interpretar el HTML
+                    balanceEl.innerHTML = formatBalance(balance);
                     adjustBalanceFontSize(balanceEl);
                 }
-                if (updatedEl) {
-                    updatedEl.textContent = `Updated: ${formatTime(Date.now())}`;
-                }
+                if (updatedEl) updatedEl.textContent = `Updated: ${formatTime(wallet.timestamp)}`;
             }
-            
-            // Quitar clase loading
+
             icon.classList.remove('loading');
             refreshBtn.disabled = false;
         });
@@ -119,12 +96,20 @@ function attachWalletListeners(item, wallet, elements) {
     if (deleteBtn) {
         deleteBtn.addEventListener('click', e => {
             e.stopPropagation();
-            showDeleteConfirmation(wallet.address, elements);
+            if (isPreview) {
+                // Solo resetear modal
+                const event = new CustomEvent('previewDelete', { detail: wallet });
+                item.dispatchEvent(event);
+            } else {
+                showDeleteConfirmation(wallet.address, elements);
+            }
         });
     }
+
+    if (addressEl) setupWalletAddressToggle([addressEl]);
 }
 
-/* ===================== MAIN LIST RENDER ===================== */
+/* ===================== RENDER LIST ===================== */
 export function renderTrackedWallets(elements) {
     const section = elements.trackedWalletsSection;
     const list = elements.trackedWalletsList;
@@ -142,12 +127,19 @@ export function renderTrackedWallets(elements) {
     state.savedWallets.forEach(wallet => {
         const item = renderWalletCard(wallet, elements);
         list.appendChild(item);
-        
-        const balanceEl = item.querySelector('.wallet-balance');
-        if (balanceEl) adjustBalanceFontSize(balanceEl);
     });
+    
+    // Truncado inicial
+    list.querySelectorAll('.wallet-address').forEach(addr => {
+        truncateWalletAddress(addr, addr.dataset.fullAddress);
+    });
+    
+    // Setup toggle
+    setupWalletAddressToggle(list.querySelectorAll('.wallet-address'));
+    
 }
 
+/* ===================== EMPTY STATE ===================== */
 function createEmptyState() {
     return `
         <div class="empty-state">
@@ -162,32 +154,28 @@ function createEmptyState() {
             </p>
             <div class="empty-state-hint">
                 Tap<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <path d="M12 5v14M5 12h14"/>
-        </svg>to add your first wallet
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>to add your first wallet
             </div>
         </div>
     `;
 }
-
 
 /* ===================== REFRESH ALL ===================== */
 export async function refreshAllWallets(elements) {
     const list = elements.trackedWalletsList;
     if (!list) return;
 
-    // Ícono del botón "Refresh All"
-    const refreshAllIcon = elements.refreshAllBtn.querySelector('.refresh-icon');
+    const refreshAllIcon = elements.refreshAllBtn?.querySelector('.refresh-icon');
     if (refreshAllIcon) refreshAllIcon.classList.add('loading');
     elements.refreshAllBtn.disabled = true;
 
-    // Todos los íconos individuales de wallets
     const refreshIcons = list.querySelectorAll('.refresh-wallet .refresh-icon');
     refreshIcons.forEach(icon => {
         icon.classList.add('loading');
         icon.closest('.refresh-wallet').disabled = true;
     });
 
-    // Actualizar balances
     for (const wallet of state.savedWallets) {
         const balance = await fetchBalance(wallet.address);
         if (balance !== null) {
@@ -197,49 +185,29 @@ export async function refreshAllWallets(elements) {
     }
 
     localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
-    
-    // Re-renderizar todas las wallets
     renderTrackedWallets(elements);
 
-    // Quitar animaciones y habilitar botones
     if (refreshAllIcon) refreshAllIcon.classList.remove('loading');
     elements.refreshAllBtn.disabled = false;
-
     list.querySelectorAll('.refresh-wallet').forEach(btn => btn.disabled = false);
 }
-
 
 /* ===================== DELETE CONFIRMATION ===================== */
 function showDeleteConfirmation(address, elements) {
     const confirmModal = document.getElementById('confirmModal');
     const confirmAddress = document.getElementById('confirmAddress');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    
+
     if (!confirmModal || !confirmAddress || !confirmDeleteBtn) return;
-    
-    // Mostrar dirección
+
     confirmAddress.textContent = address;
-    
-    // Mostrar modal
     confirmModal.classList.remove('hidden');
-    
-    // Crear nuevo listener para evitar duplicados
+
     const newDeleteBtn = confirmDeleteBtn.cloneNode(true);
     confirmDeleteBtn.parentNode.replaceChild(newDeleteBtn, confirmDeleteBtn);
-    
+
     newDeleteBtn.addEventListener('click', () => {
         deleteWallet(address, elements);
         confirmModal.classList.add('hidden');
     });
-}
-
-/* ===================== HELPERS ===================== */
-function createLoadingCard(text = "Fetching balance...") {
-    const loadingCard = document.createElement('div');
-    loadingCard.className = 'wallet-item loading-card';
-    loadingCard.innerHTML = `
-        <div class="wallet-loading-spinner"></div>
-        <div class="wallet-loading-text">${text}</div>
-    `;
-    return loadingCard;
 }

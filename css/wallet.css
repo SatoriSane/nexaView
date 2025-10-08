@@ -207,7 +207,8 @@
     color: var(--gold); /* for Firefox y otros navegadores */
   }
 
-  .wallet-address {
+/* Wallet address normal: truncada */
+.wallet-address {
     font-size: 0.825rem;
     color: var(--text-secondary);
     font-family: 'Courier New', monospace;
@@ -218,12 +219,21 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     white-space: nowrap;
     overflow: hidden;
+    text-overflow: clip;
+    cursor: pointer;
     transition: all 0.2s ease;
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
 }
+
+/* Cuando se hace tap/click: se expande */
+.wallet-address.expanded {
+    white-space: normal; /* permite saltos de línea */
+    overflow: visible;
+    text-overflow: clip;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    word-break: break-all; /* asegura que la dirección no se salga del contenedor */
+}
+
 
 .wallet-address:hover {
     background: rgba(255, 255, 255, 0.05);
