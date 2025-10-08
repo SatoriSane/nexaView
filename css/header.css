@@ -1,26 +1,25 @@
-
 /* ===== HEADER ===== */
 .header {
     display: flex;
-    flex-direction: column; /* importante para apilar logo+título+subtítulo */
+    flex-direction: column;
     align-items: center;
-    justify-content: center; /* opcional: centra verticalmente */
-    margin-bottom: 0px;     /* ajustable */
-    padding-top: 0px;
+    justify-content: center;
+    margin-bottom: 32px;
+    padding: 16px 0;
+    text-align: center;
 }
-
 
 /* Logo + título */
 .logo {
     display: flex;
     align-items: center;
-    gap: 12px; /* espacio entre logo y título */
+    gap: 12px;
 }
 
 /* Logo SVG */
 .logo-icon {
-    width: 182px;
-    height: 56px;
+    width: 160px;
+    height: auto;
 }
 .logo-icon-min {
     width: 24px;
@@ -28,42 +27,39 @@
     flex-shrink: 0;
 }
 
-/* Título */
+/* Título principal */
 .logo h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 2.4rem;
+    font-weight: 800;
     margin: 0;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: 1px;
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.25); /* sutil, elegante */
 }
 
+/* Subtítulo */
 .subtitle {
-    color: var(--text-secondary);
     font-size: 0.95rem;
-
-    position: relative;    /* para poder mover con left */
-}
-
-
-/* Título */
-.text-container h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0;
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: 1px;
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-}
-
-/* Subtítulo: alineado con el inicio del texto, no con el borde del logo */
-.subtitle {
+    font-weight: 500;
+    margin-top: 6px;
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin: 4px 0 0 0;
+    letter-spacing: 0.3px;
 }
 
+/* Entrada suave */
+.header {
+    animation: fadeInDown 0.6s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
