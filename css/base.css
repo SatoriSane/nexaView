@@ -32,16 +32,19 @@ body {
     margin: 0;
     color: var(--text-primary);
     min-height: 100vh;
+    /* Extiende el fondo para cubrir la barra de estado */
+    min-height: 100dvh; /* Dynamic viewport height */
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     position: relative;
     overflow-x: hidden;
 }
 
-/* Asegura que no haya espacio arriba en PWA */
+/* Asegura que el contenido se extienda bajo la barra de estado */
 @supports (padding-top: env(safe-area-inset-top)) {
     body {
         padding-top: env(safe-area-inset-top);
+        background-attachment: fixed;
     }
 }
 

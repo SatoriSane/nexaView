@@ -4,7 +4,7 @@
   "description": "Check Nexa address balance in real-time",
   "start_url": "/index.html",
   "display": "standalone",
-  "theme_color": "#1a1a1a",
+  "theme_color": "#0a0a0a",
   "background_color": "#0a0a0a",
   "orientation": "portrait-primary",
   "icons": [
