@@ -65,7 +65,7 @@ body, .container, header, main, footer, button, svg, .section-title, .wallet-ite
 }
 
 main {
-    padding-bottom: calc(8px + 16px); /* altura footer + gap */
+    padding-bottom: 20px;
 }
 
 /* Permitir selección en inputs y textareas */
