@@ -31,7 +31,6 @@ html {
     /* Elimina cualquier borde o espacio en Android */
     border: none;
     outline: none;
-    
 }
 
 body {
@@ -63,15 +62,23 @@ body, .container, header, main, footer, button, svg, .section-title, .wallet-ite
     -webkit-user-select: none; /* Safari/Chrome */
     -moz-user-select: none;    /* Firefox */
     -ms-user-select: none;     /* IE10+ */
-    scrollbar-width: none;
-}
-body::-webkit-scrollbar {
-    display: none;
-  }
-main {
-    padding-bottom: 20px;
 }
 
+main {
+    padding-bottom: 0px;
+}
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    overscroll-behavior: none;
+  }
+  
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  
 /* Permitir selección en inputs y textareas */
 input, textarea {
     user-select: text;
