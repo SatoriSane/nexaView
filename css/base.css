@@ -65,7 +65,7 @@ body, .container, header, main, footer, button, svg, .section-title, .wallet-ite
 }
 
 main {
-    padding-bottom: 24px;
+    padding-bottom: 50px;
 }
 html, body {
     height: 100%;
