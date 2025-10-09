@@ -25,14 +25,22 @@
     box-sizing: border-box;
 }
 
+html {
+    margin: 0;
+    padding: 0;
+    /* Elimina cualquier borde o espacio en Android */
+    border: none;
+    outline: none;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: radial-gradient(ellipse at top, #1a1a1a 0%, var(--bg-primary) 100%);
+    /* Gradiente que empieza desde el mismo color que theme-color para Android */
+    background: radial-gradient(ellipse at top, var(--bg-primary) 0%, var(--bg-primary) 20%, #1a1a1a 60%, var(--bg-primary) 100%);
     padding-top: 0;
     margin: 0;
     color: var(--text-primary);
     min-height: 100vh;
-    /* Extiende el fondo para cubrir la barra de estado */
     min-height: 100dvh; /* Dynamic viewport height */
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -75,8 +83,9 @@ body::before {
     left: 0;
     right: 0;
     bottom: 0;
+    /* Iluminación dorada más abajo para no interferir con la barra de estado */
     background:
-        radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 20% 60%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
