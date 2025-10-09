@@ -1,6 +1,7 @@
+//js/wallets.js
 import { CONFIG, state } from './config.js';
 import { formatBalance, formatTime, fetchBalance } from './balanceClient.js';
-import { adjustBalanceFontSize, setupWalletAddressToggle, truncateWalletAddress } from './ui.js';
+import { adjustBalanceFontSize, setupWalletAddressToggle, truncateWalletAddress, formatRelativeTime } from './ui.js';
 
 /* ===================== LOAD & SAVE ===================== */
 export function loadSavedWallets(elements) {
@@ -38,7 +39,7 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
 
     card.innerHTML = `
         <div class="wallet-top">
-            <div class="wallet-updated">Updated: ${formatTime(wallet.timestamp)}</div>
+            <div class="wallet-updated">${formatRelativeTime(wallet.timestamp)}</div>
             <div class="wallet-actions">
                 <button class="wallet-btn delete-wallet" title="Delete">✖</button>
                 ${'<button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>'}
@@ -86,7 +87,7 @@ function attachWalletListeners(item, wallet, elements, isPreview = false) {
                     balanceEl.innerHTML = formatBalance(balance);
                     adjustBalanceFontSize(balanceEl);
                 }
-                if (updatedEl) updatedEl.textContent = `Updated: ${formatTime(wallet.timestamp)}`;
+                if (updatedEl) updatedEl.textContent = formatRelativeTime(wallet.timestamp);
             }
 
             icon.classList.remove('loading');
@@ -139,6 +140,16 @@ export function renderTrackedWallets(elements) {
     setupWalletAddressToggle(list.querySelectorAll('.wallet-address'));
     
 }
+/* ===================== AUTO-UPDATE WALLET TIMESTAMPS ===================== */
+setInterval(() => {
+    document.querySelectorAll('.wallet-updated').forEach(el => {
+        const address = el.closest('.wallet-item')?.querySelector('.wallet-address')?.dataset?.fullAddress;
+        const wallet = state.savedWallets.find(w => w.address === address);
+        if (wallet && wallet.timestamp) {
+            el.textContent = formatRelativeTime(wallet.timestamp);
+        }
+    });
+}, 10000); // cada 10 segundos
 
 /* ===================== EMPTY STATE ===================== */
 function createEmptyState() {

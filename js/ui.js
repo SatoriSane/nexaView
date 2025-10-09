@@ -93,6 +93,22 @@ export function truncateWalletAddress(element, fullAddress) {
         startLen--;
     }
 }
+/* ===================== FORMATO RELATIVO DE TIEMPO ===================== */
+export function formatRelativeTime(timestamp) {
+    if (!timestamp) return "Never updated";
+
+    const now = Date.now();
+    const diff = Math.floor((now - timestamp) / 1000); // diferencia en segundos
+
+    if (diff < 5) return "Updated just now";
+    if (diff < 60) return `Updated ${diff}s ago`;
+    const minutes = Math.floor(diff / 60);
+    if (minutes < 60) return `Updated ${minutes}min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `Updated ${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `Updated ${days}d ago`;
+}
 
 /* ===================== TOGGLE + COPY DIRECCIÓN ===================== */
 export function setupWalletAddressToggle(addressElements = document.querySelectorAll('.wallet-address')) {
