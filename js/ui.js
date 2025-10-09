@@ -67,13 +67,6 @@ export function adjustBalanceFontSize(element) {
     });
 }
 
-/* ===================== WALLET ADDRESS TRUNCATION ===================== */
-
-/**
- * Trunca centralmente una dirección, sacrificando caracteres antes de los últimos 4
- * @param {HTMLElement} element 
- * @param {string} fullAddress 
- */
 /* ===================== TRUNCADO DE DIRECCIÓN ===================== */
 export function truncateWalletAddress(element, fullAddress) {
     if (!element || !fullAddress) return;
@@ -101,7 +94,7 @@ export function truncateWalletAddress(element, fullAddress) {
     }
 }
 
-/* ===================== TOGGLE DIRECCIÓN ===================== */
+/* ===================== TOGGLE + COPY DIRECCIÓN ===================== */
 export function setupWalletAddressToggle(addressElements = document.querySelectorAll('.wallet-address')) {
     if (!addressElements) return;
 
@@ -116,7 +109,7 @@ export function setupWalletAddressToggle(addressElements = document.querySelecto
         truncateWalletAddress(addr, fullAddress);
 
         // Click sobre la dirección
-        addr.addEventListener('click', e => {
+        addr.addEventListener('click', async e => {
             e.stopPropagation();
 
             // Contraer otras direcciones expandidas
@@ -128,10 +121,23 @@ export function setupWalletAddressToggle(addressElements = document.querySelecto
             });
 
             const expanded = addr.classList.toggle('expanded');
-            if (!expanded) truncateWalletAddress(addr, fullAddress);
-            else {
+
+            if (!expanded) {
+                truncateWalletAddress(addr, fullAddress);
+            } else {
                 addr.textContent = fullAddress;
                 addr.style.whiteSpace = 'normal';
+
+                // ===== COPIAR AL PORTAPAPELES =====
+                try {
+                    await navigator.clipboard.writeText(fullAddress);
+
+                    // feedback visual temporal
+                    addr.classList.add('copied');
+                    setTimeout(() => addr.classList.remove('copied'), 500);
+                } catch (err) {
+                    console.error('No se pudo copiar la dirección:', err);
+                }
             }
         });
     });

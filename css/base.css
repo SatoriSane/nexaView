@@ -45,12 +45,7 @@ main {
     padding-bottom: calc(56px + 16px); /* altura footer + gap */
 }
 /* Permitir seleccionar solo las direcciones de wallet */
-.wallet-address {
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-}
+
 
 /* Opcional: permitir selección en inputs y textareas */
 input, textarea {

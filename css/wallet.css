@@ -247,6 +247,11 @@
     color: var(--text-primary);
 }
 
+.wallet-address.copied {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.5);
+    transition: all 0.3s ease;
+}
 
 /* ===== LOADING CARD ===== */
 .loading-card {
