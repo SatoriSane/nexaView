@@ -1,6 +1,6 @@
 {
   "name": "Nexa View",
-  "short_name": "NexaView",
+  "short_name": "Nexa View",
   "description": "Check Nexa address balance in real-time",
   "start_url": "/index.html",
   "display": "standalone",
