@@ -1,5 +1,5 @@
 {
-  "name": "nexaView",
+  "name": "Nexa View",
   "version": "1.0.0",
   "description": "Progressive Web App para consultar balance de direcciones Nexa en tiempo real",
   "main": "index.html",
@@ -12,9 +12,10 @@
     "blockchain",
     "balance",
     "pwa",
+    "wallet",
     "cryptocurrency"
   ],
-  "author": "nexaView Team",
+  "author": "Nexa View Team",
   "license": "MIT",
   "devDependencies": {
     "vercel": "^33.0.0"

@@ -147,7 +147,7 @@ NEXA_API_URL=https://nexaapi.deno.dev
 ## 📖 How to Use
 
 ### 1. **Add a Wallet**
-   - Click the **"Add Wallet"** button
+   - Click the **"FAB (+)"** button
    - Enter a Nexa address (format: `nexa:...`)
    - Click **"View Balance"**
    - The balance will be displayed instantly
