@@ -41,8 +41,8 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
         <div class="wallet-top">
             <div class="wallet-updated">${formatRelativeTime(wallet.timestamp)}</div>
             <div class="wallet-actions">
+                <button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>
                 <button class="wallet-btn delete-wallet" title="Delete">✖</button>
-                ${'<button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>'}
             </div>
         </div>
         <div class="wallet-balance-center">

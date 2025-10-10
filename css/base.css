@@ -164,6 +164,12 @@ body::before {
     border-color: var(--text-secondary);
 }
 
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
 /* ===== FLOATING ACTION BUTTON ===== */
 .fab {
     position: fixed;
