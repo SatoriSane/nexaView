@@ -83,11 +83,16 @@ function showLoadingPreview(elements, address) {
     elements.modalTitle.textContent = 'Fetching Balance...';
     elements.modalPreviewCard.classList.remove('hidden');
 
+    const tempName = `wallet#${address.slice(-4)}`;
+    
     elements.modalPreviewCard.innerHTML = `
         <div class="wallet-item">
-            <div class="wallet-top">
-                <div class="wallet-updated">Loading...</div>
-                <div class="wallet-actions"></div>
+            <div class="wallet-header">
+                <div></div>
+                <div class="wallet-name-container">
+                    <div class="wallet-name">${tempName}</div>
+                </div>
+                <div></div>
             </div>
             <div class="wallet-balance-center">
                 <div class="loading-spinner"></div>

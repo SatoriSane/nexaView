@@ -1,34 +1,23 @@
 //js/wallets.js
 import { CONFIG, state } from './config.js';
 import { formatBalance, formatTime, fetchBalance } from './balanceClient.js';
-import { adjustBalanceFontSize, setupWalletAddressToggle, truncateWalletAddress, formatRelativeTime } from './ui.js';
+import { adjustBalanceFontSize, setupWalletAddressToggle, truncateWalletAddress } from './ui.js';
+import { loadWalletsFromStorage, saveWallet as saveWalletToStorage, deleteWalletFromStorage, updateWalletName, updateWalletBalance } from './storage.js';
 
 /* ===================== LOAD & SAVE ===================== */
 export function loadSavedWallets(elements) {
-    try {
-        const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
-        state.savedWallets = stored ? JSON.parse(stored) : [];
-        renderTrackedWallets(elements);
-    } catch (error) {
-        console.error('Error loading wallets:', error);
-        state.savedWallets = [];
-    }
+    state.savedWallets = loadWalletsFromStorage();
+    renderTrackedWallets(elements);
 }
 
 export function saveWallet(address, balance, elements) {
-    const existingIndex = state.savedWallets.findIndex(w => w.address === address);
-    const newWallet = { address, balance, timestamp: Date.now() };
-
-    if (existingIndex !== -1) state.savedWallets[existingIndex] = newWallet;
-    else state.savedWallets.unshift(newWallet);
-
-    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
+    const wallet = saveWalletToStorage(address, balance);
+    state.savedWallets = loadWalletsFromStorage();
     renderTrackedWallets(elements);
 }
 
 export function deleteWallet(address, elements) {
-    state.savedWallets = state.savedWallets.filter(w => w.address !== address);
-    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
+    state.savedWallets = deleteWalletFromStorage(address);
     renderTrackedWallets(elements);
 }
 
@@ -37,13 +26,33 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
     const card = document.createElement('div');
     card.className = 'wallet-item';
 
+    const walletName = wallet.customName || `wallet#${wallet.address.slice(-4)}`;
+
     card.innerHTML = `
-        <div class="wallet-top">
-            <div class="wallet-updated">${formatRelativeTime(wallet.timestamp)}</div>
-            <div class="wallet-actions">
-                <button class="wallet-btn refresh-wallet" title="Refresh"><span class="refresh-icon">↻</span></button>
-                <button class="wallet-btn delete-wallet" title="Delete">✖</button>
+        <div class="wallet-header">
+            <button class="wallet-btn delete-wallet" title="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+            </button>
+            <div class="wallet-name-container">
+                <div class="wallet-name" data-address="${wallet.address}" contenteditable="false">
+                    ${walletName}
+                    ${isPreview ? `<svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>` : ''}
+                </div>
             </div>
+            <button class="wallet-btn refresh-wallet" title="Refresh">
+                <span class="refresh-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.13-3.36L23 10M1 14l5.37 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                </span>
+            </button>
         </div>
         <div class="wallet-balance-center">
             <img src="./nexa-logo.svg" class="logo-icon-min">
@@ -57,11 +66,18 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
     return card;
 }
 
+
 /* ===================== ATTACH LISTENERS ===================== */
 function attachWalletListeners(item, wallet, elements, isPreview = false) {
     const refreshBtn = item.querySelector('.refresh-wallet');
     const deleteBtn = item.querySelector('.delete-wallet');
     const addressEl = item.querySelector('.wallet-address');
+    const nameEl = item.querySelector('.wallet-name');
+
+    // Listener para editar nombre
+    if (nameEl) {
+        setupEditableName(nameEl, wallet.address);
+    }
 
     if (refreshBtn) {
         refreshBtn.addEventListener('click', async e => {
@@ -77,17 +93,14 @@ function attachWalletListeners(item, wallet, elements, isPreview = false) {
                 wallet.balance = balance;
                 wallet.timestamp = Date.now();
 
-                const index = state.savedWallets.findIndex(w => w.address === wallet.address);
-                if (index !== -1) state.savedWallets[index] = wallet;
-                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.savedWallets));
+                state.savedWallets = loadWalletsFromStorage();
 
+                updateWalletBalance(wallet.address, balance);
                 const balanceEl = item.querySelector('.wallet-balance');
-                const updatedEl = item.querySelector('.wallet-updated');
                 if (balanceEl) {
                     balanceEl.innerHTML = formatBalance(balance);
                     adjustBalanceFontSize(balanceEl);
                 }
-                if (updatedEl) updatedEl.textContent = formatRelativeTime(wallet.timestamp);
             }
 
             icon.classList.remove('loading');
@@ -109,6 +122,57 @@ function attachWalletListeners(item, wallet, elements, isPreview = false) {
     }
 
     if (addressEl) setupWalletAddressToggle([addressEl]);
+}
+
+/* ===================== EDITABLE NAME ===================== */
+function setupEditableName(nameEl, address) {
+    let originalName = nameEl.textContent.trim();
+
+    nameEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        nameEl.contentEditable = 'true';
+        nameEl.classList.add('editing');
+        nameEl.focus();
+        
+        // Seleccionar todo el texto
+        const range = document.createRange();
+        range.selectNodeContents(nameEl);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    });
+
+    nameEl.addEventListener('blur', () => {
+        finishEditing(nameEl, address);
+    });
+
+    nameEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            nameEl.blur();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            nameEl.textContent = originalName;
+            nameEl.blur();
+        }
+    });
+
+    function finishEditing(el, addr) {
+        el.contentEditable = 'false';
+        el.classList.remove('editing');
+        
+        const newName = el.textContent.trim();
+        if (newName && newName !== originalName) {
+            updateWalletName(addr, newName);
+            originalName = newName;
+        } else if (!newName) {
+            // Si está vacío, restaurar nombre por defecto
+            const defaultName = `wallet#${addr.slice(-4)}`;
+            el.textContent = defaultName;
+            updateWalletName(addr, defaultName);
+            originalName = defaultName;
+        }
+    }
 }
 
 /* ===================== RENDER LIST ===================== */
@@ -140,16 +204,6 @@ export function renderTrackedWallets(elements) {
     setupWalletAddressToggle(list.querySelectorAll('.wallet-address'));
     
 }
-/* ===================== AUTO-UPDATE WALLET TIMESTAMPS ===================== */
-setInterval(() => {
-    document.querySelectorAll('.wallet-updated').forEach(el => {
-        const address = el.closest('.wallet-item')?.querySelector('.wallet-address')?.dataset?.fullAddress;
-        const wallet = state.savedWallets.find(w => w.address === address);
-        if (wallet && wallet.timestamp) {
-            el.textContent = formatRelativeTime(wallet.timestamp);
-        }
-    });
-}, 10000); // cada 10 segundos
 
 /* ===================== EMPTY STATE ===================== */
 function createEmptyState() {

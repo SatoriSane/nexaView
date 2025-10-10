@@ -170,6 +170,54 @@ body::before {
     flex-shrink: 0;
 }
 
+/* ===== TEXT VIEW-ONLY WALLETS ===== */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 4px;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.01em;
+    padding-left: 10px;
+    opacity: 0.9;
+}
+
+/* ===== TEXT BUTTON (Refresh All) ===== */
+.refresh-all-btn {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.refresh-all-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.refresh-all-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+    transform: translateY(-1px);
+}
+
+.refresh-all-btn:active {
+    transform: translateY(0);
+}
 /* ===== FLOATING ACTION BUTTON ===== */
 .fab {
     position: fixed;
