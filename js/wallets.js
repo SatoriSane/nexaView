@@ -26,7 +26,7 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
     const card = document.createElement('div');
     card.className = 'wallet-item';
 
-    const walletName = wallet.customName || `wallet#${wallet.address.slice(-4)}`;
+    const walletName = wallet.customName || `Nexa ${wallet.address.slice(-4)}`;
 
     card.innerHTML = `
         <div class="wallet-header">
@@ -173,7 +173,7 @@ function setupEditableName(nameEl, editIcon, address) {
             originalName = newName;
         } else if (!newName) {
             // Si está vacío, restaurar nombre por defecto
-            const defaultName = `wallet#${addr.slice(-4)}`;
+            const defaultName = `Nexa ${addr.slice(-4)}`;
             el.textContent = defaultName;
             updateWalletName(addr, defaultName);
             originalName = defaultName;
