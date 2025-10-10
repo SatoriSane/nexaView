@@ -40,11 +40,11 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
             <div class="wallet-name-container">
                 <div class="wallet-name" data-address="${wallet.address}" contenteditable="false">
                     ${walletName}
-                    ${isPreview ? `<svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>` : ''}
                 </div>
+                <svg class="edit-icon ${isPreview ? 'always-visible' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
             </div>
             <button class="wallet-btn refresh-wallet" title="Refresh">
                 <span class="refresh-icon">
@@ -73,10 +73,11 @@ function attachWalletListeners(item, wallet, elements, isPreview = false) {
     const deleteBtn = item.querySelector('.delete-wallet');
     const addressEl = item.querySelector('.wallet-address');
     const nameEl = item.querySelector('.wallet-name');
+    const editIcon = item.querySelector('.edit-icon');
 
-    // Listener para editar nombre
-    if (nameEl) {
-        setupEditableName(nameEl, wallet.address);
+    // Listener para editar nombre (al hacer click en el icono)
+    if (nameEl && editIcon) {
+        setupEditableName(nameEl, editIcon, wallet.address);
     }
 
     if (refreshBtn) {
@@ -125,11 +126,16 @@ function attachWalletListeners(item, wallet, elements, isPreview = false) {
 }
 
 /* ===================== EDITABLE NAME ===================== */
-function setupEditableName(nameEl, address) {
+function setupEditableName(nameEl, editIcon, address) {
     let originalName = nameEl.textContent.trim();
 
-    nameEl.addEventListener('click', (e) => {
+    // Click en el icono de editar activa el modo edición
+    editIcon.addEventListener('click', (e) => {
         e.stopPropagation();
+        startEditing();
+    });
+
+    function startEditing() {
         nameEl.contentEditable = 'true';
         nameEl.classList.add('editing');
         nameEl.focus();
@@ -140,7 +146,7 @@ function setupEditableName(nameEl, address) {
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-    });
+    }
 
     nameEl.addEventListener('blur', () => {
         finishEditing(nameEl, address);
@@ -286,4 +292,3 @@ function showDeleteConfirmation(address, elements) {
         confirmModal.classList.add('hidden');
     });
 }
-

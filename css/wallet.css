@@ -103,6 +103,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 8px;
     min-width: 0;
 }
 
@@ -111,7 +112,7 @@
     font-size: 1.4rem;
     color: var(--text-primary);
     font-weight: 600;
-    cursor: pointer;
+    cursor: default;
     transition: all 0.25s ease;
     outline: none;
     max-width: 100%;
@@ -122,14 +123,6 @@
     letter-spacing: 0.02em;
     text-transform: uppercase;
     opacity: 0.7;
-    
-}
-
-.wallet-name:hover {
-    background: rgba(212, 175, 55, 0.08);
-    border-color: rgba(212, 175, 55, 0.3);
-    color: var(--gold);
-    transform: translateY(-1px);
 }
 
 .wallet-name.editing {
@@ -139,12 +132,47 @@
     cursor: text;
     box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
     transform: translateY(0);
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 
 .wallet-name:focus {
     background: rgba(212, 175, 55, 0.12);
     border-color: var(--gold);
     box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+/* ===== EDIT ICON - Solo visible en hover ===== */
+.edit-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+/* Mostrar icono cuando la card está en hover */
+.wallet-item:hover .edit-icon {
+    opacity: 0.6;
+}
+
+.edit-icon:hover {
+    opacity: 1 !important;
+    color: var(--gold);
+    transform: scale(1.1);
+}
+
+/* Mantener visible cuando está en modo edición */
+.wallet-name.editing ~ .edit-icon {
+    opacity: 1 !important;
+    color: var(--gold);
+}
+
+/* Siempre visible cuando es preview */
+.edit-icon.always-visible {
+    opacity: 0.6 !important;
 }
 
 .wallet-btn {
@@ -299,7 +327,7 @@
    LOADING STATES - Elegantes y Sutiles
    ═══════════════════════════════════════════════════════════ */
 
-   .loading-card {
+.loading-card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -330,22 +358,3 @@
     letter-spacing: 1px;
     opacity: 0.7;
 }
-
-.wallet-name-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .edit-icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.6;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    flex-shrink: 0;
-  }
-  
-  .edit-icon:hover {
-    opacity: 1;
-  }
