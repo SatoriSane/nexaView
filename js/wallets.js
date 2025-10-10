@@ -3,7 +3,7 @@ import { CONFIG, state } from './config.js';
 import { formatBalance, formatTime, fetchBalance } from './balanceClient.js';
 import { adjustBalanceFontSize, setupWalletAddressToggle, truncateWalletAddress } from './ui.js';
 import { loadWalletsFromStorage, saveWallet as saveWalletToStorage, deleteWalletFromStorage, updateWalletName, updateWalletBalance } from './storage.js';
-
+import { openReceiveScreen } from './receive-screen.js';
 /* ===================== LOAD & SAVE ===================== */
 export function loadSavedWallets(elements) {
     state.savedWallets = loadWalletsFromStorage();
@@ -27,16 +27,10 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
     card.className = 'wallet-item';
 
     const walletName = wallet.customName || `Nexa ${wallet.address.slice(-4)}`;
+    const balance = wallet.balance ?? 0; // fallback en caso de que no exista
 
     card.innerHTML = `
         <div class="wallet-header">
-            <button class="wallet-btn delete-wallet" title="Delete">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                    <line x1="10" y1="11" x2="10" y2="17"/>
-                    <line x1="14" y1="11" x2="14" y2="17"/>
-                </svg>
-            </button>
             <div class="wallet-name-container">
                 <div class="wallet-name" data-address="${wallet.address}" contenteditable="false">
                     ${walletName}
@@ -46,6 +40,28 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
                     <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
             </div>
+        </div>
+
+        <div class="wallet-balance-center">
+            <img src="./nexa-logo.svg" class="logo-icon-min">
+            <span class="wallet-balance">${formatBalance(balance)}</span>
+        </div>
+
+        <div class="wallet-address" data-full-address="${wallet.address}">
+            ${wallet.address}
+        </div>
+
+        <!-- acciones flotantes -->
+        <div class="wallet-actions">
+            <button class="wallet-btn expand-wallet" title="Receive / Expand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+            </button>
+
             <button class="wallet-btn refresh-wallet" title="Refresh">
                 <span class="refresh-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -53,18 +69,30 @@ export function renderWalletCard(wallet, elements, isPreview = false) {
                     </svg>
                 </span>
             </button>
+
+            <button class="wallet-btn delete-wallet" title="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+            </button>
         </div>
-        <div class="wallet-balance-center">
-            <img src="./nexa-logo.svg" class="logo-icon-min">
-            <span class="wallet-balance">${formatBalance(wallet.balance)}</span>
-        </div>
-        <div class="wallet-address" data-full-address="${wallet.address}">${wallet.address}</div>
     `;
 
     attachWalletListeners(card, wallet, elements, isPreview);
 
+    // Botón "Receive" abre pantalla completa
+    const expandBtn = card.querySelector('.expand-wallet');
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => openReceiveScreen(wallet));
+    }
+
     return card;
 }
+
+
+
 
 
 /* ===================== ATTACH LISTENERS ===================== */

@@ -19,7 +19,11 @@ export async function fetchBalance(address, elements) {
         }
 
         const data = await response.json();
-        return data.balance ?? 0;
+        // Return total balance (confirmed + unconfirmed)
+        const confirmed = data.balance ?? 0;
+        const unconfirmed = data.unconfirmed ?? 0;
+        console.log(`[Balance] Confirmed: ${confirmed}, Unconfirmed: ${unconfirmed}, Total: ${confirmed + unconfirmed}`);
+        return confirmed + unconfirmed;
 
     } catch (error) {
         console.error('Error fetchBalance:', error);

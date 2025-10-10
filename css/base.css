@@ -40,7 +40,9 @@ html, body {
     overscroll-behavior: none;
     touch-action: manipulation;
 }
-
+main {
+    padding-bottom: 60px; /* Ajusta según la altura real del footer */
+}
 body::-webkit-scrollbar {
     display: none;
 }

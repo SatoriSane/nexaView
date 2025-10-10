@@ -1,0 +1,635 @@
+/* ===== RECEIVE SCREEN - FULL SCREEN MODE ===== */
+.receive-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-primary);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    animation: slideInFromBottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.receive-screen.hidden {
+    display: none;
+}
+
+@keyframes slideInFromBottom {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ===== RECEIVE HEADER - MINIMAL ===== */
+.receive-header {
+    position: relative;
+    padding: 20px 20px 12px;
+    text-align: center;
+}
+
+.receive-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+    z-index: 10;
+    /* Aumentar área de click */
+    padding: 12px;
+}
+
+.receive-close-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg) scale(1.05);
+    opacity: 1;
+}
+
+.receive-close-btn:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+.receive-close-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.5;
+}
+
+.receive-wallet-name {
+    /* Usar estilos de wallet-name de wallets.js */
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+}
+
+/* ===== RECEIVE BODY ===== */
+.receive-body {
+    flex: 1;
+    padding: 20px 20px 40px;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* ===== QR MAIN SECTION (QR + Address) ===== */
+.qr-main-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.qr-wrapper {
+    width: 280px;
+    height: 280px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.qr-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.qr-error {
+    color: var(--error);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* ===== ADDRESS COMPACT (inspired by wallet.css) ===== */
+.address-compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.address-text {
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-copy-compact {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.btn-copy-compact:hover {
+    color: var(--gold);
+    opacity: 1;
+}
+
+.btn-copy-compact svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-copy-compact.copied {
+    color: var(--success);
+    opacity: 1;
+}
+
+/* ===== AMOUNT SECTION - PROTAGONIST ===== */
+.amount-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.amount-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.amount-input {
+    width: 100%;
+    padding: 20px 80px 20px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    font-weight: 300;
+    text-align: center;
+    transition: all 0.3s ease;
+    outline: none;
+    letter-spacing: -0.5px;
+}
+
+.amount-input:focus {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+}
+
+.amount-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.4;
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+/* Remove spinner arrows for number input */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.amount-input[type=number] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.amount-currency {
+    position: absolute;
+    right: 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gold);
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+/* ===== PAYMENT STATUS INDICATOR ===== */
+.payment-status {
+    margin-top: 8px;
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-waiting,
+.status-received {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-waiting.hidden,
+.status-received.hidden {
+    display: none;
+}
+
+.status-waiting {
+    position: relative;
+}
+
+.pulse-ring {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 3px solid var(--gold);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.2;
+    }
+}
+
+.status-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--gold);
+    position: relative;
+    z-index: 1;
+}
+
+.status-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.status-amount {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--success);
+    margin-top: 4px;
+}
+
+.status-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 8px;
+    color: #fbbf24;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-warning svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.status-warning.hidden {
+    display: none;
+}
+
+/* Success Checkmark Animation */
+.success-checkmark {
+    width: 80px;
+    height: 80px;
+}
+
+.success-checkmark svg {
+    width: 80px;
+    height: 80px;
+}
+
+.checkmark-circle {
+    stroke: var(--success);
+    stroke-width: 2;
+    stroke-miterlimit: 10;
+    animation: checkmarkCircle 0.8s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    stroke: var(--success);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: checkmarkCheck 0.4s 0.4s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+/* Amount mismatch styling (orange/amber) */
+.status-received.amount-mismatch .checkmark-circle {
+    stroke: #fbbf24;
+}
+
+.status-received.amount-mismatch .checkmark-check {
+    stroke: #fbbf24;
+}
+
+.status-received.amount-mismatch .status-amount {
+    color: #fbbf24;
+}
+
+@keyframes checkmarkCircle {
+    0% {
+        stroke-dasharray: 0 157;
+        transform: rotate(0deg);
+    }
+    100% {
+        stroke-dasharray: 157 157;
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes checkmarkCheck {
+    0% {
+        stroke-dashoffset: 48;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes successPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+.status-received {
+    animation: fadeInScale 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== TRANSACTIONS SECTION ===== */
+.transactions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 12px;
+}
+
+.transactions-toggle {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.transactions-toggle:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(212, 175, 55, 0.2);
+    color: var(--text-primary);
+}
+
+.toggle-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.transactions-list {
+    margin-top: 12px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.transactions-list.hidden {
+    display: none;
+}
+
+.transactions-loading,
+.transactions-empty,
+.transactions-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 20px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.transactions-loading .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.transactions-empty svg,
+.transactions-error svg {
+    width: 32px;
+    height: 32px;
+    opacity: 0.5;
+}
+
+.transactions-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.transaction-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tx-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.transaction-item.received .tx-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.transaction-item.sent .tx-icon {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+}
+
+.tx-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.tx-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tx-amount {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.transaction-item.received .tx-amount {
+    color: var(--success);
+}
+
+.transaction-item.sent .tx-amount {
+    color: var(--error);
+}
+
+.tx-date {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.view-more-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px;
+    margin-top: 8px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 10px;
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.view-more-link:hover {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: var(--gold);
+}
+
+.view-more-link svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 480px) {
+    .receive-body {
+        padding: 16px 16px 32px;
+        gap: 20px;
+    }
+    
+    .qr-wrapper {
+        width: 240px;
+        height: 240px;
+        padding: 16px;
+    }
+    
+    .amount-input {
+        font-size: 1.5rem;
+        padding: 18px 70px 18px 18px;
+    }
+    
+    .amount-input::placeholder {
+        font-size: 1rem;
+    }
+}
+
+/* ===== SAFE AREA SUPPORT (iOS) ===== */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .receive-header {
+        padding-top: calc(24px + env(safe-area-inset-top));
+    }
+    
+    .receive-body {
+        padding-bottom: calc(32px + env(safe-area-inset-bottom));
+    }
+}

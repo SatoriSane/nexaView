@@ -1,36 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-        <meta name="description" content="Check Nexa address balance in real-time">
-        
-        <!-- Android/Chrome - Color oscuro para integrar con la barra de estado -->
-        <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
-        <meta name="theme-color" content="#0a0a0a">
-        
-        <!-- iOS - Barra de estado translúcida -->
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Nexa View">
-        
-        <!-- Android específico -->
-        <meta name="mobile-web-app-capable" content="yes">
-        <!-- PWA Meta Tags -->
-        <link rel="manifest" href="/manifest.json?v=1.1">
-        <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
-        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
-        <link rel="apple-touch-icon" href="/icons/icon-512x512.png">
-        <title>Nexa View - Nexa Balance Checker</title>
-        <link rel="stylesheet" href="/css/base.css">
-        <link rel="stylesheet" href="/css/header.css">
-        <link rel="stylesheet" href="/css/input.css">
-        <link rel="stylesheet" href="/css/wallet.css">
-        <link rel="stylesheet" href="/css/footer.css">
-        <link rel="stylesheet" href="/css/notifications.css">
-        <link rel="stylesheet" href="/css/modal.css">
-        <link rel="stylesheet" href="/css/empty-state.css">
-      </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Check Nexa address balance in real-time">
+
+    <!-- Android/Chrome - Color oscuro para integrar con la barra de estado -->
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#0a0a0a">
+
+    <!-- iOS - Barra de estado translúcida -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Nexa View">
+
+    <!-- Android específico -->
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json?v=1.1">
+    <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="/icons/icon-512x512.png">
+
+    <title>Nexa View - Nexa Balance Checker</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/input.css">
+    <link rel="stylesheet" href="/css/wallet.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/notifications.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/empty-state.css">
+    <link rel="stylesheet" href="/css/receive-screen.css">
+    
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
 <body>
     <div class="container">
         <header class="header">
@@ -40,14 +48,12 @@
             </div>
             <p class="subtitle">The Safest Way to Monitor Nexa Wallets</p>
         </header>
+
         <!-- Main -->
         <main>
-
-            <!-- Tracked Wallets -->
-             
             <div id="trackedWalletsSection" class="tracked-wallets-section hidden">
                 <div class="section-header">
-                    <h3 class="section-title">View-Only Wallets</h3>                    
+                    <h3 class="section-title">View-Only Wallets</h3>
                     <button id="refreshAllBtn" class="refresh-all-btn" title="Refresh all balances">
                         <span class="refresh-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -56,7 +62,6 @@
                         </span>
                         Refresh All
                     </button>
-                    
                 </div>
                 <div id="trackedWalletsList" class="tracked-wallets-list"></div>
             </div>
@@ -68,7 +73,6 @@
                 <span class="status-indicator" id="statusIndicator"></span>
                 <span id="statusText">Ready </span>
             </p>
-            
             <div class="footer-actions">
                 <button id="installAppBtn" class="install-app-btn hidden" title="Install App">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -76,7 +80,6 @@
                     </svg>
                     Install NEXA View
                 </button>
-        
                 <div id="updateNotification" class="update-notification hidden">
                     <span>New version available!</span>
                     <button id="updateBtn" class="update-btn">Update Now</button>
@@ -85,17 +88,6 @@
         </footer>
     </div>
 
-
-    <!-- JavaScript Modules -->
-    <script type="module">
-        import './js/config.js';
-        import './js/pwa.js';
-        import './js/ui.js';
-        import './js/wallets.js';
-        import './js/balanceClient.js';
-        import './js/app.js';
-        import './js/add-wallet-modal.js';
-    </script>
     <!-- FAB Button -->
     <button id="addWalletBtn" class="fab" title="Add wallet">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -115,18 +107,10 @@
                     </svg>
                 </button>
             </div>
-            
             <div class="modal-body">
                 <label for="addressInput" class="label">Nexa Address</label>
                 <div class="input-group">
-                    <input 
-                        type="text" 
-                        id="addressInput" 
-                        class="input" 
-                        placeholder="nexa:nqtsq5g5..."
-                        autocomplete="off"
-                        spellcheck="false"
-                    >
+                    <input type="text" id="addressInput" class="input" placeholder="nexa:nqtsq5g5..." autocomplete="off" spellcheck="false">
                     <button id="clearBtn" class="clear-btn" title="Clear">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -135,13 +119,7 @@
                     </button>
                 </div>
                 <div id="errorMessage" class="error-message hidden"></div>
-                
-                <!-- Preview Wallet Card (hidden initially) -->
-                <div id="modalPreviewCard" class="hidden" style="margin: 20px 0;">
-                    <!-- Wallet card will be injected here -->
-                </div>
-
-                <!-- Action Button Container -->
+                <div id="modalPreviewCard" class="hidden" style="margin: 20px 0;"></div>
                 <div id="modalActionContainer" style="margin-top: 20px;">
                     <button id="trackWalletBtn" class="btn btn-primary" style="width: 100%;">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -175,5 +153,17 @@
             </div>
         </div>
     </div>
+
+    <!-- JS Modules -->
+    <script type="module">
+        import './js/config.js';
+        import './js/pwa.js';
+        import './js/ui.js';
+        import './js/wallets.js';
+        import './js/balanceClient.js';
+        import './js/app.js';
+        import './js/add-wallet-modal.js';
+        import './js/receive-screen.js';
+    </script>
 </body>
 </html>
