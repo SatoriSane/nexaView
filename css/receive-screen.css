@@ -52,7 +52,6 @@
     transition: all 0.2s ease;
     opacity: 0.8;
     z-index: 10;
-    /* Aumentar área de click */
     padding: 12px;
 }
 
@@ -60,7 +59,6 @@
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
-    transform: rotate(90deg) scale(1.05);
     opacity: 1;
 }
 
@@ -75,12 +73,13 @@
 }
 
 .receive-wallet-name {
-    /* Usar estilos de wallet-name de wallets.js */
-    font-size: 1.1rem;
+    font-size: 3rem;
     color: var(--text-primary);
     font-weight: 600;
     letter-spacing: 0.5px;
-    opacity: 0.9;
+    padding-top: 20px;
+    padding-bottom: 5px;
+    opacity: 0.8;
 }
 
 /* ===== RECEIVE BODY ===== */
@@ -100,20 +99,26 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
+/* === QR Wrapper === */
 .qr-wrapper {
     width: 280px;
     height: 280px;
-    background: #ffffff;
+    background: #fff;
     border-radius: 20px;
     padding: 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(212, 175, 55, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    transition: transform 0.3s ease;
+}
+
+.qr-wrapper:hover {
+    transform: scale(1.02);
 }
 
 .qr-image {
@@ -128,56 +133,84 @@
     text-align: center;
 }
 
-/* ===== ADDRESS COMPACT (inspired by wallet.css) ===== */
+/* === Address Compact Row === */
 .address-compact {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 8px 12px;
     background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 8px 14px;
+    transition: all 0.25s ease;
 }
 
-.address-text {
-    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-    font-size: 0.7rem;
+.address-compact:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+}
+
+/* === QR Wallet Text (Address) === */
+.qr-wallet-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    opacity: 0.7;
-    max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    max-width: 320px;
+    text-align: center;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
+.qr-wallet-text:hover {
+    color: var(--gold-light);
+    text-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
+}
+
+.qr-wallet-text.expanded {
+    white-space: normal;
+    word-break: break-all;
+    color: var(--text-primary);
+    text-shadow: none;
+}
+
+/* === Copy Button === */
 .btn-copy-compact {
     width: 28px;
     height: 28px;
     background: transparent;
     border: none;
-    color: var(--text-secondary);
+    color: var(--silver-dark);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
-    opacity: 0.6;
+    transition: color 0.25s ease, transform 0.2s ease;
+    opacity: 0.7;
     flex-shrink: 0;
 }
 
 .btn-copy-compact:hover {
     color: var(--gold);
     opacity: 1;
+    transform: scale(1.1);
 }
 
 .btn-copy-compact svg {
     width: 16px;
     height: 16px;
+    stroke-width: 2;
 }
 
 .btn-copy-compact.copied {
     color: var(--success);
     opacity: 1;
+    transform: scale(1.15);
 }
 
 /* ===== AMOUNT SECTION - PROTAGONIST ===== */
@@ -220,7 +253,6 @@
     font-weight: 400;
 }
 
-/* Remove spinner arrows for number input */
 .amount-input::-webkit-outer-spin-button,
 .amount-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -261,50 +293,70 @@
     gap: 12px;
 }
 
+.status-waiting {
+    display: flex;
+    flex-direction: row;   /* línea única */
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
 .status-waiting.hidden,
 .status-received.hidden {
     display: none;
 }
 
-.status-waiting {
-    position: relative;
+.status-waiting .status-icon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    height: auto;
 }
 
-.pulse-ring {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    border: 3px solid var(--gold);
-    border-radius: 50%;
-    opacity: 0.6;
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.status-waiting .status-icon.animating {
+    animation: iconGlow 1.5s infinite alternate;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(0.8);
-        opacity: 0.6;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 0.2;
-    }
-}
-
-.status-icon {
-    width: 48px;
-    height: 48px;
-    color: var(--gold);
-    position: relative;
-    z-index: 1;
-}
-
-.status-text {
+.status-waiting .status-text {
+    white-space: nowrap;
     font-size: 0.95rem;
     color: var(--text-secondary);
     font-weight: 500;
 }
 
+/* ===== WAITING DOTS ===== */
+.status-waiting .dots {
+    display: flex;
+    gap: 3px;
+    margin-left: 0;
+}
+.status-waiting .dots span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin: 0 3px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: blink 1.4s infinite both;
+}
+
+.status-waiting .dots span:nth-child(1) { animation-delay: 0s; }
+.status-waiting .dots span:nth-child(2) { animation-delay: 0.2s; }
+.status-waiting .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+    0%, 80%, 100% { opacity: 0.3; }
+    40% { opacity: 1; }
+}
+
+@keyframes iconGlow {
+    0% { filter: drop-shadow(0 0 2px rgba(212,175,55,0.3)); }
+    100% { filter: drop-shadow(0 0 6px rgba(212,175,55,0.6)); }
+}
+
+/* ===== OTHER STATUS ELEMENTS ===== */
 .status-amount {
     font-size: 1.5rem;
     font-weight: 600;
@@ -364,46 +416,30 @@
     animation: checkmarkCheck 0.4s 0.4s cubic-bezier(0.65, 0, 0.45, 1) forwards;
 }
 
-/* Amount mismatch styling (orange/amber) */
+/* Amount mismatch styling */
 .status-received.amount-mismatch .checkmark-circle {
     stroke: #fbbf24;
 }
-
 .status-received.amount-mismatch .checkmark-check {
     stroke: #fbbf24;
 }
-
 .status-received.amount-mismatch .status-amount {
     color: #fbbf24;
 }
 
 @keyframes checkmarkCircle {
-    0% {
-        stroke-dasharray: 0 157;
-        transform: rotate(0deg);
-    }
-    100% {
-        stroke-dasharray: 157 157;
-        transform: rotate(360deg);
-    }
+    0% { stroke-dasharray: 0 157; transform: rotate(0deg); }
+    100% { stroke-dasharray: 157 157; transform: rotate(360deg); }
 }
 
 @keyframes checkmarkCheck {
-    0% {
-        stroke-dashoffset: 48;
-    }
-    100% {
-        stroke-dashoffset: 0;
-    }
+    0% { stroke-dashoffset: 48; }
+    100% { stroke-dashoffset: 0; }
 }
 
 @keyframes successPulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.08);
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
 }
 
 .status-received {
@@ -411,216 +447,8 @@
 }
 
 @keyframes fadeInScale {
-    0% {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* ===== TRANSACTIONS SECTION ===== */
-.transactions-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 12px;
-}
-
-.transactions-toggle {
-    width: 100%;
-    padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: all 0.2s ease;
-}
-
-.transactions-toggle:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(212, 175, 55, 0.2);
-    color: var(--text-primary);
-}
-
-.toggle-icon {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s ease;
-}
-
-.transactions-list {
-    margin-top: 12px;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.transactions-list.hidden {
-    display: none;
-}
-
-.transactions-loading,
-.transactions-empty,
-.transactions-error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 32px 20px;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.transactions-loading .spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(212, 175, 55, 0.2);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.transactions-empty svg,
-.transactions-error svg {
-    width: 32px;
-    height: 32px;
-    opacity: 0.5;
-}
-
-.transactions-items {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.transaction-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.2s ease;
-}
-
-.transaction-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.tx-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.transaction-item.received .tx-icon {
-    background: rgba(16, 185, 129, 0.15);
-    color: var(--success);
-}
-
-.transaction-item.sent .tx-icon {
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--error);
-}
-
-.tx-icon svg {
-    width: 16px;
-    height: 16px;
-}
-
-.tx-details {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.tx-amount {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.transaction-item.received .tx-amount {
-    color: var(--success);
-}
-
-.transaction-item.sent .tx-amount {
-    color: var(--error);
-}
-
-.tx-date {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    opacity: 0.7;
-}
-
-.view-more-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 12px;
-    margin-top: 8px;
-    background: rgba(212, 175, 55, 0.08);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    border-radius: 10px;
-    color: var(--gold);
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.view-more-link:hover {
-    background: rgba(212, 175, 55, 0.12);
-    border-color: var(--gold);
-}
-
-.view-more-link svg {
-    width: 14px;
-    height: 14px;
-}
-
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
-@media (max-width: 480px) {
-    .receive-body {
-        padding: 16px 16px 32px;
-        gap: 20px;
-    }
-    
-    .qr-wrapper {
-        width: 240px;
-        height: 240px;
-        padding: 16px;
-    }
-    
-    .amount-input {
-        font-size: 1.5rem;
-        padding: 18px 70px 18px 18px;
-    }
-    
-    .amount-input::placeholder {
-        font-size: 1rem;
-    }
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 /* ===== SAFE AREA SUPPORT (iOS) ===== */

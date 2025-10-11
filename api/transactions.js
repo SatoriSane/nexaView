@@ -8,10 +8,13 @@
  * Respuesta: JSON con transacciones o error
  */
 export default async function handler(req, res) {
-    // Configurar CORS headers
+    // Configurar CORS headers + anti-cache
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     
     // Manejar preflight request
     if (req.method === 'OPTIONS') {
@@ -64,13 +67,15 @@ export default async function handler(req, res) {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
-                        'User-Agent': 'nexaView-PWA/1.0'
+                        'User-Agent': 'nexaView-PWA/1.0',
+                        'Cache-Control': 'no-cache'
                     }
                 });
                 
                 if (response.ok) {
                     data = await response.json();
                     console.log(`[API] Endpoint exitoso: ${nexaApiUrl}`);
+                    console.log(`[API] Número de transacciones recibidas: ${data?.transactions?.length || 0}`);
                     break;
                 }
                 
@@ -105,34 +110,41 @@ export default async function handler(req, res) {
         }
         
         console.log(`[API] Transacciones obtenidas exitosamente`);
-        console.log('[API] Raw data from Nexa API:', JSON.stringify(data, null, 2));
+        
+        // PRIMERO: Ordenar las transacciones por height (más reciente primero)
+        let transactionsList = data.transactions || [];
+        transactionsList.sort((a, b) => (b.height || 0) - (a.height || 0));
+        console.log(`[API] Transacciones ordenadas por height. Total: ${transactionsList.length}`);
+        
+        // SEGUNDO: Tomar solo las 10 MÁS RECIENTES después de ordenar
+        const txsToFetch = transactionsList.slice(0, 10);
+        console.log(`[API] Obteniendo detalles de las ${txsToFetch.length} transacciones más recientes`);
         
         // Si solo tenemos tx_hash, necesitamos obtener los detalles de cada transacción
         let detailedTransactions = [];
         
-        if (data.transactions && Array.isArray(data.transactions)) {
-            // Limitar a las primeras 10 transacciones para no sobrecargar
-            const txsToFetch = data.transactions.slice(0, 10);
-            
-            for (const tx of txsToFetch) {
-                if (tx.tx_hash) {
-                    try {
-                        const txDetailUrl = `https://nexaapi.deno.dev/tx/${tx.tx_hash}`;
-                        console.log(`[API] Obteniendo detalles de tx: ${tx.tx_hash}`);
-                        
-                        const txResponse = await fetch(txDetailUrl);
-                        if (txResponse.ok) {
-                            const txDetail = await txResponse.json();
-                            console.log(`[API] TX Detail for ${tx.tx_hash}:`, JSON.stringify(txDetail, null, 2));
-                            // Agregar el height del listado original
-                            txDetail.height = tx.height;
-                            detailedTransactions.push(txDetail);
-                        } else {
-                            console.log(`[API] No se pudieron obtener detalles de ${tx.tx_hash}, status: ${txResponse.status}`);
+        for (const tx of txsToFetch) {
+            if (tx.tx_hash) {
+                try {
+                    const txDetailUrl = `https://nexaapi.deno.dev/tx/${tx.tx_hash}`;
+                    
+                    const txResponse = await fetch(txDetailUrl, {
+                        headers: {
+                            'Cache-Control': 'no-cache'
                         }
-                    } catch (err) {
-                        console.error(`[API] Error obteniendo detalles de tx:`, err);
+                    });
+                    
+                    if (txResponse.ok) {
+                        const txDetail = await txResponse.json();
+                        // Agregar el height del listado original (IMPORTANTE para ordenamiento)
+                        txDetail.height = tx.height;
+                        detailedTransactions.push(txDetail);
+                        console.log(`[API] TX obtenida: ${tx.tx_hash} - Height: ${tx.height}`);
+                    } else {
+                        console.log(`[API] No se pudieron obtener detalles de ${tx.tx_hash}, status: ${txResponse.status}`);
                     }
+                } catch (err) {
+                    console.error(`[API] Error obteniendo detalles de tx:`, err);
                 }
             }
         }
@@ -141,6 +153,16 @@ export default async function handler(req, res) {
         
         // Procesar y formatear transacciones
         const transactions = processTransactions(detailedTransactions, address);
+        
+        console.log(`[API] Transacciones procesadas y ordenadas. Enviando ${transactions.length} transacciones`);
+        if (transactions.length > 0) {
+            console.log('[API] Primera transacción (más reciente):', {
+                txid: transactions[0].txid,
+                timestamp: transactions[0].timestamp,
+                date: new Date(transactions[0].timestamp * 1000).toISOString(),
+                height: transactions[0].height
+            });
+        }
         
         return res.status(200).json({
             success: true,
@@ -186,9 +208,10 @@ function processTransactions(data, address) {
         return [];
     }
     
-    return transactions.map(txWrapper => {
+    const processed = transactions.map(txWrapper => {
         // La API de Nexa devuelve {transaction: {...}}
         const tx = txWrapper.transaction || txWrapper;
+        
         // Calcular el monto neto para esta dirección
         let amount = 0;
         let type = 'received';
@@ -236,24 +259,20 @@ function processTransactions(data, address) {
             type = 'received';
         }
         
-        // Usar blocktime que viene en la respuesta (ya está en segundos Unix)
+        // CRÍTICO: Usar blocktime que viene en la respuesta (ya está en segundos Unix)
         let timestamp = tx.blocktime || tx.time || tx.timestamp;
         
-        if (!timestamp) {
-            timestamp = Date.now() / 1000;
+        // Si no hay timestamp válido, usar height como aproximación
+        // Un height mayor = más reciente
+        if (!timestamp || timestamp <= 0) {
+            console.warn(`[API] Transacción sin timestamp válido: ${tx.txid}. Usando height: ${tx.height}`);
+            // Aproximación: cada bloque ~2 minutos (120 segundos)
+            // Esto es solo para ordenamiento relativo
+            timestamp = (tx.height || 0) * 120;
         }
         
-        // Log para depuración
-        console.log('[API] Transaction processed:', {
-            txid: tx.txid || tx.hash || tx.tx_hash,
-            type: type,
-            amount: amount,
-            timestamp: timestamp,
-            date: new Date(timestamp * 1000).toISOString(),
-            height: tx.height,
-            isFrom: isFromThisAddress,
-            isTo: isToThisAddress
-        });
+        // Convertir a número para asegurar ordenamiento correcto
+        timestamp = Number(timestamp);
         
         return {
             txid: tx.txid || tx.hash || tx.tx_hash,
@@ -261,7 +280,31 @@ function processTransactions(data, address) {
             amount: Math.abs(amount),
             timestamp: timestamp,
             confirmations: tx.confirmations || 0,
-            height: tx.height
+            height: tx.height || 0
         };
-    }).sort((a, b) => b.timestamp - a.timestamp); // Ordenar por fecha descendente
+    });
+    
+    // ORDENAR por múltiples criterios: primero por timestamp, luego por height
+    processed.sort((a, b) => {
+        // Primero intentar ordenar por timestamp
+        if (b.timestamp !== a.timestamp) {
+            return b.timestamp - a.timestamp;
+        }
+        // Si timestamps son iguales, ordenar por height (más reciente primero)
+        return b.height - a.height;
+    });
+    
+    // Log de las primeras 3 transacciones para debugging
+    console.log('[API] Primeras 3 transacciones procesadas:', 
+        processed.slice(0, 3).map(tx => ({
+            txid: tx.txid?.substring(0, 10) + '...',
+            type: tx.type,
+            amount: tx.amount,
+            timestamp: tx.timestamp,
+            date: new Date(tx.timestamp * 1000).toISOString(),
+            height: tx.height
+        }))
+    );
+    
+    return processed;
 }

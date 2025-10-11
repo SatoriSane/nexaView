@@ -7,8 +7,9 @@
     --gold: #d4af37;
     --gold-dark: #b8941f;
     --gold-light: #f4d03f;
-
-    --success: #10b981;
+    --silver: #c0c0c0; /* Plateado principal */
+    --silver-dark: #a0a0a0; /* Plateado oscuro / Gris de acento */
+    --silver-light: #e0e0e0; /* Plateado claro / Highlight */    --success: #10b981;
     --error: #ef4444;
     --warning: #f59e0b;
 

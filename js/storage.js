@@ -49,7 +49,7 @@ export function saveWallet(address, balance, customName = null) {
     const existingIndex = wallets.findIndex(w => w.address === address);
     
     // Generar nombre por defecto si no existe
-    const defaultName = `wallet#${address.slice(-4)}`;
+    const defaultName = `WALLET ${address.slice(-4)}`;
     
     const newWallet = {
         address,
@@ -111,6 +111,7 @@ export function updateWalletBalance(address, balance) {
     
     wallets[walletIndex].balance = balance;
     wallets[walletIndex].timestamp = Date.now();
+    wallets[walletIndex].lastUpdated = Date.now();
     saveWalletsToStorage(wallets);
     return true;
 }

@@ -34,6 +34,10 @@ export class BalanceMonitor {
      * Start monitoring a wallet
      */
     start(wallet, onPaymentCallback) {
+        if (this.currentWallet && this.currentWallet.address === wallet.address) {
+            console.log('[BalanceMonitor] Already monitoring this wallet, skipping start.');
+            return;
+        }
         this.stop(); // Clean up any existing monitoring
         
         this.currentWallet = wallet;
@@ -80,6 +84,12 @@ export class BalanceMonitor {
             });
             this.activityHandler = null;
         }
+        if (this.currentWallet) {
+            this.currentWallet = null;
+        }
+        if (this.onPaymentReceived) {
+            this.onPaymentReceived = null;
+        }
         
         console.log('[BalanceMonitor] Stopped monitoring');
     }
@@ -119,11 +129,11 @@ export class BalanceMonitor {
         const elapsedMinutes = (Date.now() - this.startTime) / 60000;
         
         // Base intervals
-        const VERY_FAST = 2000;   // 2 seconds
-        const FAST = 3000;        // 3 seconds
-        const NORMAL = 5000;      // 5 seconds
+        const VERY_FAST = 1500;   // 1.5 seconds
+        const FAST = 2500;        // 2.5 seconds
+        const NORMAL = 4000;      // 4 seconds
         const SLOW = 10000;       // 10 seconds
-        const VERY_SLOW = 20000;  // 20 seconds
+        const VERY_SLOW = 25000;  // 25 seconds
         
         // Priority 1: User just opened screen (first 2 minutes)
         if (elapsedMinutes < 2) {
@@ -133,9 +143,9 @@ export class BalanceMonitor {
         // Priority 2: User requested specific amount (high intent)
         if (this.hasRequestedAmount) {
             if (elapsedMinutes < 5) {
-                return this.isUserActive ? FAST : NORMAL;
+                return this.isUserActive ? VERY_FAST : FAST;
             } else if (elapsedMinutes < 15) {
-                return this.isUserActive ? NORMAL : SLOW;
+                return this.isUserActive ? FAST : SLOW;
             } else {
                 // After 15 minutes, very slow
                 return VERY_SLOW;
@@ -175,7 +185,7 @@ export class BalanceMonitor {
      */
     async checkBalance() {
         if (!this.currentWallet) return;
-        
+        if (!this.interval && !this.currentWallet) return; // redundancia de seguridad
         this.consecutiveChecks++;
         
         try {
