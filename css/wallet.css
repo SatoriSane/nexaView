@@ -215,7 +215,7 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 28px 0 20px;
+    padding: 10px 0 10px;
     margin: 8px 0;
 }
 
@@ -264,8 +264,8 @@
     color: var(--text-secondary);
     font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
     text-align: center;
-    padding: 6px 12px;
-    margin-bottom: 16px;
+    padding: 6px 20px;
+    margin-bottom: 20px;
     white-space: nowrap;
     border-radius: 12px;
     overflow: hidden;
