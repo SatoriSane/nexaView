@@ -12,11 +12,14 @@
     display: flex;
     flex-direction: column;
     opacity: 1;
-    transition: opacity 0.3s ease;
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s ease;
 }
 
 .receive-screen.hidden {
     opacity: 0;
+    transform: translateY(100%); /* Desplaza hacia abajo cuando está oculto */
     pointer-events: none;
 }
 
