@@ -1,16 +1,19 @@
 // js/receive-screen.js
 import { truncateWalletAddress, setupWalletAddressToggle } from './ui.js'; 
-import { CONFIG, state } from './config.js'; // ⬅️ ASUMIMOS ESTA IMPORTACIÓN NECESARIA
+import { CONFIG, state } from './config.js';
+import { fetchBalance } from './balanceClient.js'; // ← NUEVO: importar para sincronización inicial
+
 let currentWallet = null;
 let receiveContainer = null;
 let celebrationTimeout = null;
 let qrUpdateTimeout = null;
+let initialBalance = null; // ← NUEVO: guardar balance inicial
 
 /**
  * Opens the receive screen for a specific wallet
  * @param {Object} wallet - The wallet object containing address and balance
  */
-export function openReceiveScreen(wallet) {
+export async function openReceiveScreen(wallet) {
     currentWallet = wallet;
     
     if (!receiveContainer) {
@@ -23,8 +26,6 @@ export function openReceiveScreen(wallet) {
     // Remover hidden si existía (para que sea visible en el DOM)
     receiveContainer.classList.remove('hidden');
     
-    // ✅ NO ocultar main y FAB todavía - dejar que la animación se sobreponga
-    
     // Forzar reflow para que el navegador aplique el estado inicial (translateY(100%))
     receiveContainer.offsetHeight;
     
@@ -33,48 +34,74 @@ export function openReceiveScreen(wallet) {
         receiveContainer.classList.add('visible');
     });
     
-    // ✅ Ocultar main y FAB DESPUÉS de que la animación haya terminado (o durante)
-    // Esto evita el parpadeo y hace que la pantalla se sobreponga naturalmente
+    // Ocultar main y FAB DESPUÉS de que la animación haya terminado
     setTimeout(() => {
         const main = document.querySelector('main');
         const fab = document.getElementById('addWalletBtn');
         if (main) main.style.display = 'none';
         if (fab) fab.style.display = 'none';
-    }, 200); // A mitad de la animación (400ms total)
+    }, 200);
     
     generateQR(wallet.address);
     
-    // ✅ Setup WebSocket callback usando window global
+    // ✅ CRÍTICO: Obtener balance inicial ANTES de configurar el callback
+    try {
+        initialBalance = await fetchBalance(wallet.address);
+        console.log(`📊 Initial balance for ${wallet.address}: ${initialBalance}`);
+        
+        // Actualizar el balance en el wallet actual
+        if (initialBalance !== null) {
+            currentWallet.balance = initialBalance;
+        }
+    } catch (err) {
+        console.warn('⚠️ Could not fetch initial balance:', err);
+        initialBalance = wallet.balance || 0;
+    }
+    
+    // ✅ Setup WebSocket callback DESPUÉS de tener el balance inicial
     window.receiveScreenCallback = (address, balance) => {
         if (!currentWallet) return;
-        if (address === currentWallet.address) {
-            const previousBalance = currentWallet.balance || 0;
-            const receivedAmount = balance - previousBalance;
+        if (address !== currentWallet.address) return;
+        
+        console.log(`💰 Balance update: ${address} -> ${balance} (previous: ${initialBalance})`);
+        
+        // Comparar con el balance inicial capturado
+        const referenceBalance = initialBalance ?? currentWallet.balance ?? 0;
+        const receivedAmount = balance - referenceBalance;
+        
+        if (receivedAmount > 0) {
+            console.log(`✅ Payment detected: +${receivedAmount}`);
+            currentWallet.balance = balance;
+            initialBalance = balance; // ← Actualizar referencia
+            showPaymentReceived(receivedAmount);
             
-            if (receivedAmount > 0) {
-                currentWallet.balance = balance;
-                showPaymentReceived(receivedAmount);
-                
-                // Haptic feedback if available
-                if (navigator.vibrate) {
-                    navigator.vibrate([100, 50, 100]);
-                }
-            } else {
-                currentWallet.balance = balance;
+            // Haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
             }
+        } else if (balance !== referenceBalance) {
+            // Balance cambió pero no es positivo (posible gasto, o ajuste)
+            console.log(`ℹ️ Balance changed but not positive: ${receivedAmount}`);
+            currentWallet.balance = balance;
+            initialBalance = balance;
         }
     };
     
-    // Solo suscribirse si es la wallet de donación Y NO está en la lista guardada.
+    // ✅ Determinar si necesitamos suscribir
     const isDonationWallet = wallet.address === CONFIG.DONATION_WALLET_ADDRESS;
     const isWalletTracked = state.savedWallets.some(w => w.address === wallet.address);
+    
+    // ✅ Suscribir INMEDIATAMENTE (no en then asíncrono)
     if (isDonationWallet && !isWalletTracked) {
-        import('./realtime.js').then(module => {
-            module.subscribe(wallet.address);
-        });
+        try {
+            const realtimeModule = await import('./realtime.js');
+            realtimeModule.subscribe(wallet.address);
+            console.log(`📡 Subscribed to donation wallet: ${wallet.address}`);
+        } catch (err) {
+            console.error('❌ Failed to subscribe:', err);
+        }
     }
 }
-
 
 /**
  * Closes the receive screen and returns to main view
@@ -88,7 +115,7 @@ export function closeReceiveScreen() {
     // Limpiar callback global
     window.receiveScreenCallback = null;
     
-    // ✅ CAMBIO: Restaurar la vista principal INMEDIATAMENTE
+    // ✅ Restaurar la vista principal INMEDIATAMENTE
     const main = document.querySelector('main');
     const fab = document.getElementById('addWalletBtn');
     if (main) main.style.display = 'block';
@@ -114,6 +141,7 @@ export function closeReceiveScreen() {
             if (!isWalletTracked) {
                 import('./realtime.js').then(realtimeModule => {
                     realtimeModule.unsubscribe(walletToClose.address);
+                    console.log(`📴 Unsubscribed from: ${walletToClose.address}`);
                 });
             }
         }
@@ -121,6 +149,7 @@ export function closeReceiveScreen() {
         // Limpieza final de referencias globales/de módulo
         currentWallet = null;
         receiveContainer = null;
+        initialBalance = null; // ← NUEVO: limpiar balance inicial
         
         if (celebrationTimeout) {
             clearTimeout(celebrationTimeout);
@@ -130,7 +159,7 @@ export function closeReceiveScreen() {
             clearTimeout(qrUpdateTimeout);
             qrUpdateTimeout = null;
         }
-    }, 400); // Duración de la transición CSS (0.4s)
+    }, 400);
 }
 
 /**
@@ -152,7 +181,7 @@ function createReceiveScreen() {
             <div class="receive-wallet-name" id="receiveWalletName"></div>
         </div>
         <div class="receive-body">
-                    <div class="payment-status" id="paymentStatus">
+            <div class="payment-status" id="paymentStatus">
                 <div class="status-waiting" id="statusWaiting">
                     <span class="status-icon">
                         <span class="status-text">Waiting for transaction</span>
@@ -214,14 +243,12 @@ function createReceiveScreen() {
                         aria-label="Enter amount in NEXA (optional)"
                         min="0"
                         step="0.01"
-                        
                         inputmode="decimal"
                         pattern="[0-9]*\\.?[0-9]*"
                     >
                     <span class="amount-currency">NEXA</span>
                 </div>
             </div>
-
         </div>
     `;
     document.body.appendChild(receiveContainer);
@@ -236,12 +263,10 @@ function updateReceiveScreen(wallet) {
     const addressEl = document.getElementById('receiveAddress');
     const amountInput = document.getElementById('amountInput');
 
-    // Update wallet name
     if (nameEl) {
         nameEl.textContent = walletName;
     }
 
-    // Update address
     if (addressEl) {
         const fullAddress = wallet.address;
         addressEl.classList.remove('expanded', 'copied');
@@ -262,7 +287,6 @@ function updateReceiveScreen(wallet) {
         });
     }
 
-    // Reset input and states
     if (amountInput) amountInput.value = '';
     resetReceiveStates();
 }
@@ -306,14 +330,12 @@ function attachReceiveListeners() {
         copyBtn.addEventListener('click', copyAddressToClipboard);
     }
 
-    // Amount input with debounced QR update
     if (amountInput) {
         amountInput.addEventListener('input', debounce(() => {
             if (!currentWallet) return;
             updateQRWithAmount();
         }, 500));
 
-        // Clear on Escape
         amountInput.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 amountInput.value = '';
@@ -323,7 +345,6 @@ function attachReceiveListeners() {
         });
     }
 
-    // Address click to expand/copy
     if (addressEl) {
         addressEl.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -333,7 +354,6 @@ function attachReceiveListeners() {
         });
     }
 
-    // Global keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
 }
 
@@ -343,7 +363,6 @@ function attachReceiveListeners() {
 function handleKeyboardShortcuts(e) {
     if (!receiveContainer || receiveContainer.classList.contains('hidden')) return;
 
-    // Escape to close
     if (e.key === 'Escape') {
         const amountInput = document.getElementById('amountInput');
         if (document.activeElement === amountInput) {
@@ -353,7 +372,6 @@ function handleKeyboardShortcuts(e) {
         }
     }
 
-    // Ctrl/Cmd + C to copy address
     if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         const selection = window.getSelection().toString();
         if (!selection && currentWallet) {
@@ -374,31 +392,23 @@ function updateQRWithAmount() {
     const amountInput = document.getElementById('amountInput');
     if (!amountInput || !currentWallet) return;
 
-    // Limpieza del valor ingresado
     let rawValue = amountInput.value.trim().replace(',', '.');
 
-    // Si el campo está vacío, solo mostramos el QR de la dirección
     if (rawValue === '') {
         generateQR(currentWallet.address);
         return;
     }
 
-    // Intentamos convertirlo a número
     let amount = parseFloat(rawValue);
 
-    // Si es inválido o negativo, restauramos QR sin cantidad
     if (isNaN(amount) || amount <= 0) {
         generateQR(currentWallet.address);
         return;
     }
 
-    // Aseguramos formato correcto (sin notación científica)
     const formattedAmount = (Math.floor(amount * 100) / 100).toFixed(2);
-
-    // Construimos URI de forma limpia
     const uri = `${currentWallet.address}?amount=${formattedAmount}`;
 
-    // Refrescamos el QR con animación suave
     const qrWrapper = document.getElementById('qrWrapper');
     if (qrWrapper) {
         const qrContent = qrWrapper.querySelector('img, canvas');
@@ -413,7 +423,6 @@ function updateQRWithAmount() {
     }
 }
 
-
 /**
  * Copies address to clipboard with enhanced feedback
  */
@@ -427,7 +436,6 @@ async function copyAddressToClipboard() {
     try {
         await navigator.clipboard.writeText(currentWallet.address);
         
-        // Success feedback
         copyBtn.innerHTML = `
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="20 6 9 17 4 12"></polyline>
@@ -438,12 +446,10 @@ async function copyAddressToClipboard() {
             addressEl.classList.add('copied');
         }
 
-        // Haptic feedback
         if (navigator.vibrate) {
             navigator.vibrate(50);
         }
 
-        // Reset after delay
         setTimeout(() => {
             copyBtn.innerHTML = originalHTML;
             copyBtn.classList.remove('copied');
@@ -466,7 +472,6 @@ function generateQR(data) {
     qrWrapper.innerHTML = '';
 
     try {
-        // Genera el QR
         if (typeof QRCode !== 'undefined') {
             new QRCode(qrWrapper, {
                 text: data,
@@ -477,7 +482,6 @@ function generateQR(data) {
                 correctLevel: QRCode.CorrectLevel.L
             });
         } else {
-            // Fallback: usa API externa
             const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(data)}&ecc=L`;
             const img = document.createElement('img');
             img.src = qrApiUrl;
@@ -487,16 +491,14 @@ function generateQR(data) {
             qrWrapper.appendChild(img);
         }
 
-        // 🔹 SOLUCIÓN: Hacer clic o touch en el QR copia la URI
         qrWrapper.style.cursor = 'pointer';
-        qrWrapper.style.touchAction = 'manipulation'; // Prevenir zoom
-        qrWrapper.style.userSelect = 'none'; // Prevenir selección de texto
+        qrWrapper.style.touchAction = 'manipulation';
+        qrWrapper.style.userSelect = 'none';
         qrWrapper.style.webkitUserSelect = 'none';
-        qrWrapper.style.position = 'relative'; // Para el feedback
-        qrWrapper.style.webkitTapHighlightColor = 'transparent'; // Sin highlight en móvil
+        qrWrapper.style.position = 'relative';
+        qrWrapper.style.webkitTapHighlightColor = 'transparent';
         qrWrapper.title = 'Click to copy payment link';
 
-        // Función para copiar
         const copyQRData = async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -505,18 +507,15 @@ function generateQR(data) {
                 await navigator.clipboard.writeText(data);
                 showCopyFeedback(qrWrapper);
                 
-                // Haptic feedback en móvil
                 if (navigator.vibrate) {
                     navigator.vibrate(50);
                 }
             } catch (err) {
                 console.error('Clipboard copy failed:', err);
-                // Fallback para navegadores sin clipboard API
                 fallbackCopyText(data);
             }
         };
 
-        // Event listeners para escritorio y móvil
         qrWrapper.addEventListener('click', copyQRData);
         qrWrapper.addEventListener('touchend', copyQRData);
 
@@ -529,9 +528,7 @@ function generateQR(data) {
     }
 }
 
-// Función de feedback mejorada
 function showCopyFeedback(wrapper) {
-    // Remover feedback anterior si existe
     const existingFeedback = wrapper.querySelector('.copy-feedback');
     if (existingFeedback) {
         existingFeedback.remove();
@@ -569,7 +566,6 @@ function showCopyFeedback(wrapper) {
     }, 1500);
 }
 
-// Fallback para copiar en navegadores antiguos
 function fallbackCopyText(text) {
     const textArea = document.createElement('textarea');
     textArea.value = text;
@@ -598,7 +594,6 @@ function fallbackCopyText(text) {
 
 /**
  * Show payment received with premium celebration animation
- * Differentiates between exact, less, and more payment scenarios
  */
 export function showPaymentReceived(amount) {
     const statusWaiting = document.getElementById('statusWaiting');
@@ -611,9 +606,9 @@ export function showPaymentReceived(amount) {
     const amountInput = document.getElementById('amountInput');
     const qrWrapper = document.getElementById('qrWrapper');
     const addressCompact = document.querySelector('.address-compact');
+    
     if (!qrWrapper || !statusReceived) return;
 
-    // Calculate amounts
     const nexaAmount = amount / 100;
     const formattedAmount = nexaAmount.toLocaleString('en-US', { 
         minimumFractionDigits: 2, 
@@ -624,22 +619,16 @@ export function showPaymentReceived(amount) {
         receivedAmountEl.textContent = `+${formattedAmount} NEXA`;
     }
 
-    // Validate requested amount
     const requestedAmount = parseFloat(amountInput?.value || 0);
     
-    // Reset all payment state classes
     statusReceived.classList.remove('payment-exact', 'payment-less', 'payment-more');
     
-    // Hide all notifications first
     if (notificationLess) notificationLess.classList.add('hidden');
     if (notificationMore) notificationMore.classList.add('hidden');
 
-    // Determine payment status and configure UI
     if (requestedAmount === 0) {
-        // No amount requested - treat as exact/success
         statusReceived.classList.add('payment-exact');
     } else if (nexaAmount < requestedAmount) {
-        // Payment is less than requested
         const difference = requestedAmount - nexaAmount;
         const formattedDiff = difference.toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -653,7 +642,6 @@ export function showPaymentReceived(amount) {
             notificationLess.classList.remove('hidden');
         }
     } else if (nexaAmount > requestedAmount) {
-        // Payment is more than requested
         const difference = nexaAmount - requestedAmount;
         const formattedDiff = difference.toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -667,28 +655,22 @@ export function showPaymentReceived(amount) {
             notificationMore.classList.remove('hidden');
         }
     } else {
-        // Payment matches exactly
         statusReceived.classList.add('payment-exact');
     }
-// Ocultar la dirección
+
     if (addressCompact) {
-        // 🔥 NUEVA LÍNEA: Ocultar o aplicar clase de oscurecimiento
-        addressCompact.classList.add('hide-or-dim'); // Usaremos 'hide-or-dim'
+        addressCompact.classList.add('hide-or-dim');
     }
-    // Hide waiting state with fade
+
     if (statusWaiting) {
         statusWaiting.classList.add('hidden');
     }
 
-    // Add dark overlay to QR
     qrWrapper.classList.add('celebrating');
-
-    // Position statusReceived over QR and show
     statusReceived.classList.add('celebrating');
     qrWrapper.appendChild(statusReceived);
     statusReceived.classList.remove('hidden');
 
-    // Auto-restore after 5 seconds
     if (celebrationTimeout) {
         clearTimeout(celebrationTimeout);
     }
@@ -703,31 +685,26 @@ export function showPaymentReceived(amount) {
  */
 function restoreNormalState(statusReceived, statusWaiting, qrWrapper) {
     const addressCompact = document.querySelector('.address-compact');
-    // 🔥 NUEVA LÍNEA: Restaurar la visibilidad de la dirección
+    
     if (addressCompact) {
         addressCompact.classList.remove('hide-or-dim');
     }
-    // Remove dark overlay
+
     qrWrapper.classList.remove('celebrating');
-    // Remove celebrating class
     statusReceived.classList.remove('celebrating');
     statusReceived.classList.add('hidden');
 
-    // Move back to original position
     const paymentStatus = document.getElementById('paymentStatus');
     if (paymentStatus) {
         paymentStatus.appendChild(statusReceived);
     }
 
-    // Reset payment state classes
     statusReceived.classList.remove('payment-exact', 'payment-less', 'payment-more');
 
-    // Show waiting state
     if (statusWaiting) {
         statusWaiting.classList.remove('hidden');
     }
 
-    // Hide notifications
     const notificationLess = document.getElementById('notificationLess');
     const notificationMore = document.getElementById('notificationMore');
     if (notificationLess) notificationLess.classList.add('hidden');
@@ -749,7 +726,6 @@ function debounce(func, wait) {
     };
 }
 
-// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (celebrationTimeout) clearTimeout(celebrationTimeout);
     if (qrUpdateTimeout) clearTimeout(qrUpdateTimeout);
