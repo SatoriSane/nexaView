@@ -10,7 +10,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-top: 20px; /* ← Añadir espaciado superior */
+    padding-top: 0px; 
     gap: 16px;
 }
 
@@ -60,12 +60,14 @@
 
 .wallet-header {
     display: grid;
-    grid-template-columns: 42px 1fr 42px; /* ← Grid en vez de flex */
+    grid-template-columns: 42px 1fr 42px;
     align-items: flex-start;
     margin-bottom: 4px;
     gap: 8px;
     position: relative;
-    min-height: 32px;
+    
+    /* 🔥 SOLUCIÓN FINAL: Fuerza la altura mínima a la de los botones (42px) */
+    min-height: 42px; 
 }
 
 /* Botones laterales (Delete y Refresh) */
@@ -79,12 +81,17 @@
     color: var(--text-secondary);
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.25s ease;
+    /* ✅ Añadimos 'visibility' para transicionar suavemente el ocultamiento */
+    transition: all 0.25s ease, visibility 0s linear 0.25s; 
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     flex-shrink: 0;
+    
+    /* 🔥 CLAVE: Ocultamos por defecto, pero el espacio queda reservado */
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .wallet-btn svg {
@@ -94,7 +101,10 @@
 }
 
 .wallet-item:hover .wallet-btn-delete {
-    opacity: 0.5; /* ← Solo delete visible en hover */
+    opacity: 0.5;
+    visibility: visible; /* Hacemos visible el delete */
+    pointer-events: auto; /* Hacemos clickeable el delete */
+    transition: all 0.25s ease; /* Quitamos el delay de visibility en hover */
 }
 
 .wallet-btn:hover {
@@ -113,19 +123,25 @@
     grid-column: 1;
 }
 
-/* Refresh específico - columna 3 - OCULTO POR DEFECTO */
+/* ═══════════════════════════════════════════════════════════
+   REFRESH (AJUSTADO PARA VISIBILIDAD SIN SALTO)
+   ═══════════════════════════════════════════════════════════ */
 .wallet-btn-refresh {
     grid-column: 3;
-    display: none; /* ← Oculto por defecto */
+    /* ❌ Quitamos display: none; para que siempre ocupe su espacio en el Grid. */
+    /* La visibilidad y opacidad son controladas por la clase .wallet-btn base. */
 }
 
 .wallet-btn-refresh.show {
-    display: flex; /* ← Solo se muestra con clase 'show' */
-    opacity: 0.5;
+    /* ❌ Quitamos display: flex; */
+    visibility: visible; /* ✅ Se vuelve visible */
+    pointer-events: auto; /* ✅ Permite el click */
+    opacity: 0.5; /* Lo mostramos con opacidad 0.5 */
+    transition: all 0.25s ease; /* Quita el delay de visibility */
 }
 
 .wallet-item:hover .wallet-btn-refresh.show {
-    opacity: 1;
+    opacity: 1; /* Se vuelve opacidad 1 al hacer hover en el item */
 }
 
 .wallet-btn-refresh .refresh-icon.loading svg {
@@ -374,18 +390,24 @@
    ═══════════════════════════════════════════════════════════ */
 
 .wallet-last-update {
-    display: flex;
-    align-items: right;
-    justify-content: right;
-    width: 100%;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    /* Estilos existentes */
     font-size: 0.62rem;
     color: var(--text-secondary);
     opacity: 0.3;
     letter-spacing: 0.3px;
     transition: opacity 0.3s ease;
     white-space: nowrap;
+    
+    /* 🔥 CLAVE 1: Saca el elemento del flujo */
+    position: absolute;
+    
+    /* 🔥 CLAVE 2: Ancla a la esquina superior derecha, compensando el padding: 20px del .wallet-item */
+    top: 20px; 
+    right: 20px;
+    
+    /* Ocultamos por defecto. El JS lo hará aparecer/desaparecer */
+    opacity: 0;
+    pointer-events: none; /* Desactiva el clic cuando está oculto */
 }
 
 .wallet-item:hover .wallet-last-update {
