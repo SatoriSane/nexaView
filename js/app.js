@@ -7,7 +7,7 @@ import { adjustBalanceFontSize, formatRelativeTime } from './ui.js';
 import { formatBalance } from './balanceClient.js';
 import { initRealtimeStatus, connect } from './realtime.js'; // ← Importar connect también
 import { openReceiveScreen } from './receive-screen.js';
-
+import { fetchBalance } from './balanceClient.js';
 document.addEventListener('DOMContentLoaded', async () => {
   const elements = {
     addWalletBtn: document.getElementById('addWalletBtn'),
