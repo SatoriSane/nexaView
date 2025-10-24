@@ -96,44 +96,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // Inicializar sistema de estado del WebSocket
-  initRealtimeStatus(
-    {
-      statusIndicator: elements.statusIndicator,
-      statusText: elements.statusText
-    },
-    handleConnectionChange
-  );
+// Inicializar sistema de estado del WebSocket
+initRealtimeStatus(
+  {
+    statusIndicator: elements.statusIndicator,
+    statusText: elements.statusText
+  },
+  handleConnectionChange
+);
 
-  // ✅ CAMBIO: Iniciar WebSocket SIEMPRE, desde el inicio
-  connect(onBalanceUpdate);
+// ✅ Primero cargar wallets guardadas
+await loadSavedWallets(elements);
 
-  // Cargar wallets guardadas (ya no inicia el WS aquí)
-  loadSavedWallets(elements);
-// ✅ Refrescar balances cuando el usuario regresa a la app
-let lastVisibilityChange = Date.now();
+// ✅ Luego conectar WebSocket (ahora sí se suscriben correctamente)
+connect(onBalanceUpdate);
 
+// 🔄 Actualizar balances instantáneamente al volver a la app
 document.addEventListener('visibilitychange', async () => {
-  if (!document.hidden) {
-    const timeSinceLastUpdate = Date.now() - lastVisibilityChange;
-    
-    // Si han pasado más de 1 minuto, refrescar
-    if (timeSinceLastUpdate > 60000 && state.savedWallets?.length) {
-      console.log('🔄 User returned after long time, refreshing...');
-      
-      // Refresh silencioso en background
-      for (const wallet of state.savedWallets) {
+  if (!document.hidden && state.savedWallets?.length) {
+    console.log('🔄 App visible again - syncing balances...');
+    for (const wallet of state.savedWallets) {
+      try {
         const balance = await fetchBalance(wallet.address);
         if (balance !== null) {
           onBalanceUpdate(wallet.address, balance);
           updateWalletBalance(wallet.address, balance);
         }
+      } catch (err) {
+        console.warn(`⚠️ Could not refresh ${wallet.address}:`, err);
       }
     }
-    
-    lastVisibilityChange = Date.now();
   }
 });
+
   // Inicializar modal de agregar wallet
   setupWalletModal(elements);
 
