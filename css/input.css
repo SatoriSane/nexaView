@@ -1,0 +1,94 @@
+
+/* ===== INPUT SECTION ===== */
+.input-section {
+    margin-top: 0px;
+    margin-bottom: 24px;
+    animation: slideDown 0.3s ease;
+
+}
+
+.input-section.hidden {
+    display: none;
+}
+
+.btn-add.hidden {
+    display: none;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.label {
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    padding: 14px 45px 14px 16px;
+    background: rgba(10, 10, 10, 0.8);
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: 'Courier New', monospace;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+    background: rgba(10, 10, 10, 0.95);
+}
+
+.input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    display: none;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.clear-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.clear-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.clear-btn.visible {
+    display: block;
+}

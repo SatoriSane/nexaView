@@ -1,0 +1,226 @@
+/* ===== VARIABLES Y RESET ===== */
+:root {
+    /* Paleta dorado y negro - Nexa */
+    --primary: #d4af37;
+    --primary-dark: #b8941f;
+    --primary-light: #f4d03f;
+    --gold: #d4af37;
+    --gold-dark: #b8941f;
+    --gold-light: #f4d03f;
+    --silver: #c0c0c0; /* Plateado principal */
+    --silver-dark: #a0a0a0; /* Plateado oscuro / Gris de acento */
+    --silver-light: #e0e0e0; /* Plateado claro / Highlight */    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #1a1a1a;
+    --text-primary: #f5f5f5;
+    --text-secondary: #a0a0a0;
+    --border: #2a2a2a;
+    --shadow: rgba(212, 175, 55, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===== BASE HTML & BODY ===== */
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: none;
+    outline: none;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+}
+main {
+    padding-bottom: 60px; /* Ajusta según la altura real del footer */
+}
+body::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-primary);
+    background: radial-gradient(ellipse at top, var(--bg-primary) 25%, var(--bg-primary) 100%);
+    line-height: 1.6;
+    min-height: 100vh;
+    min-height: 100dvh; /* Ajuste dinámico en iOS Safari */
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* === Safe areas (para iPhone con notch) === */
+@supports (padding-top: env(safe-area-inset-top)) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        background-attachment: fixed;
+    }
+}
+
+/* ===== NO TEXT SELECTION ===== */
+body, .container, header, main, footer, button, svg, .section-title, .wallet-item {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+/* Permitir selección en campos editables */
+input, textarea {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* ===== LIGHT EFFECTS ===== */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 60%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    min-height: 100dvh;
+}
+
+/* ===== BUTTONS ===== */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    width: 100%;
+}
+
+.btn {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    color: #000;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+    border: 1px solid var(--gold-light);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(212, 175, 55, 0.6);
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    flex: 1;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-secondary);
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* ===== FLOATING ACTION BUTTON ===== */
+.fab {
+    position: fixed;
+    bottom: 52px;
+    right: 28px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    border: 1px solid var(--gold-light);
+    border-radius: 50%;
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.5);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    opacity: 0.6;
+    animation: fabEntry 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fab:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 36px rgba(212, 175, 55, 0.7);
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+    opacity: 0.85;
+}
+
+.fab:active {
+    transform: translateY(-2px) scale(1);
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.5);
+}
+
+.fab svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 3;
+    transition: transform 0.3s ease;
+}
+
+@keyframes fabEntry {
+    from {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "Nexa View",
+  "short_name": "Nexa View",
+  "description": "Check Nexa address balance in real-time",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Check Balance",
+      "short_name": "Balance",
+      "description": "Check Nexa address balance",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icons/icon-128x128.png",
+          "sizes": "128x128"
+        }
+      ]
+    }
+  ]
+}

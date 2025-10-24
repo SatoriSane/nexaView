@@ -1,0 +1,77 @@
+/* ===== HEADER ===== */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0;
+    padding: 20px 0 0;
+    text-align: center;
+    position: relative;
+}
+
+/* Ajuste adicional para dispositivos con notch/barra de estado */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .header {
+        padding-top: calc(20px + env(safe-area-inset-top));
+    }
+}
+
+/* Logo + título */
+.logo {
+    display: flex;
+    align-items: flex-end; /* ↓ clave: alinear base con el texto */
+    gap: 8px;
+    line-height: 1; /* evita espacio extra vertical */
+}
+
+/* Logo SVG */
+.logo-icon {
+    width: 172px; /* un poco más compacto */
+    height: auto;
+    transform: translateY(2px); /* ajusta visualmente */
+}
+
+/* Título principal */
+.logo h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.8px;
+}
+
+
+/* Subtítulo (versión refinada y elegante) */
+/* Subtítulo (elegante y confiable) */
+.subtitle {
+    font-size: 0.94rem;
+    font-weight: 500;
+    margin-top: 8px;
+    color: var(--text-secondary);
+    letter-spacing: 0.35px;
+    opacity: 0.9;
+    font-family: "Inter", "Poppins", "Segoe UI", "Helvetica Neue", sans-serif;
+    position: relative;
+    padding-bottom: 10px;
+    text-shadow: 0 0 3px rgba(212, 175, 55, 0.05);
+}
+
+
+
+/* Línea elegante debajo del subtítulo */
+.subtitle::after {
+    content: '';
+    display: block;
+    width: 280px;
+    height: 1px;
+    margin: 12px auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    opacity: 0.5;
+    border-radius: 2px;
+    margin-bottom: 20px;
+}
+
+

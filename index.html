@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Check Nexa address balance in real-time">
+
+    <!-- Android/Chrome - Color oscuro para integrar con la barra de estado -->
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#0a0a0a">
+
+    <!-- iOS - Barra de estado translúcida -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Nexa View">
+
+    <!-- Android específico -->
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json?v=1.2">
+    <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="/icons/icon-512x512.png">
+
+    <title>Nexa View - Nexa Balance Checker</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/input.css">
+    <link rel="stylesheet" href="/css/wallet.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/notifications.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/empty-state.css">
+    <link rel="stylesheet" href="/css/receive-screen.css">
+    
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="./full-nexa-logo.svg" alt="Nexa Logo" class="logo-icon">
+                <h1>View</h1>
+            </div>
+            <p class="subtitle">The Safest Way to Monitor Nexa Wallets</p>
+        </header>
+
+        <!-- Main -->
+        <main>
+            <div id="trackedWalletsSection" class="tracked-wallets-section hidden">
+                <div id="trackedWalletsList" class="tracked-wallets-list"></div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Ready</span>
+            </p>
+            <div class="footer-actions">
+                <!-- ✅ NUEVO: Botón de donación -->
+                <button id="donateBtn" class="donate-btn" title="Support development">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <span>Donate</span>
+                </button>
+                
+                <button id="installAppBtn" class="install-app-btn hidden" title="Install App">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                    Install NEXA View
+                </button>
+                <div id="updateNotification" class="update-notification hidden">
+                    <span>New version available!</span>
+                    <button id="updateBtn" class="update-btn">Update Now</button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- FAB Button -->
+    <button id="addWalletBtn" class="fab" title="Add wallet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+    </button>
+
+    <!-- Add Wallet Modal -->
+    <div id="addWalletModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add Wallet</h2>
+                <button id="closeModalBtn" class="modal-close" title="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="addressInput" class="label">Nexa Address</label>
+                <div class="input-group">
+                    <input type="text" id="addressInput" class="input" placeholder="nexa:nqtsq5g5..." autocomplete="off" spellcheck="false">
+                    <button id="clearBtn" class="clear-btn" title="Clear">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div id="errorMessage" class="error-message hidden"></div>
+                <div id="modalPreviewCard" class="hidden" style="margin: 20px 0;"></div>
+                <div id="modalActionContainer" style="margin-top: 20px;">
+                    <button id="trackWalletBtn" class="btn btn-primary" style="width: 100%;">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Track Wallet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Delete Wallet</h2>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-message">Are you sure you want to delete this wallet from your tracked list?</p>
+                <p class="confirm-address" id="confirmAddress"></p>
+                <div class="modal-actions">
+                    <button id="confirmCancelBtn" class="btn btn-secondary">Cancel</button>
+                    <button id="confirmDeleteBtn" class="btn btn-danger">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Modules -->
+    <script type="module">
+        import './js/config.js';
+        import './js/pwa.js';
+        import './js/wallets.js';
+        import './js/app.js';      
+    </script>
+</body>
+</html>

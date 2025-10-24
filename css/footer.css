@@ -1,0 +1,171 @@
+/* ===== FOOTER FIJO ===== */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(26, 26, 26, 0.5);
+    backdrop-filter: blur(6px);
+    border-top: 1px solid rgba(57, 54, 45, 0.2);
+    z-index: 999;
+    gap: 12px;
+}
+
+/* ===== STATUS ===== */
+.footer p:first-child {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Indicador de estado */
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: inline-block;
+    box-shadow: 0 0 8px var(--gold);
+}
+
+/* Estados del indicador */
+.status-indicator.connected {
+    background: var(--primary-dark);
+    box-shadow: 0 0 8px var(--primary);
+    animation: pulse-success 2s infinite;
+}
+
+.status-indicator.disconnected {
+    background: var(--silver-dark);
+    box-shadow: 0 0 8px var(--silver-dark);
+    animation: none;
+}
+
+.status-indicator.connecting {
+    background: var(--warning);
+    box-shadow: 0 0 8px var(--warning);
+    animation: pulse-warning 1.5s infinite;
+}
+
+.status-indicator.error {
+    background: var(--error);
+    box-shadow: 0 0 8px var(--error);
+    animation: none;
+}
+
+@keyframes pulse-success {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.95); }
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.9); }
+}
+
+/* ===== FOOTER ACTIONS ===== */
+.footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ✅ Botón de donación */
+.donate-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.donate-btn svg {
+    width: 14px;
+    height: 14px;
+    transition: all 0.3s ease;
+}
+
+.donate-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.donate-btn:hover svg {
+    fill: var(--gold);
+    transform: scale(1.1);
+}
+
+.donate-btn:active {
+    transform: translateY(0);
+}
+
+/* Botón instalar app */
+.install-app-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.install-app-btn:hover {
+    background: rgba(212, 175, 55, 0.25);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.install-app-btn:active {
+    transform: translateY(0);
+}
+
+.install-app-btn.hidden {
+    display: none;
+}
+
+/* Update notification */
+.update-notification {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.update-notification.hidden {
+    display: none;
+}
+
+.update-btn {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 6px;
+    border: none;
+    background: #000;
+    color: var(--gold);
+    cursor: pointer;
+}

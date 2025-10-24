@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns:xodm="http://www.corel.com/coreldraw/odm/2003" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 2500 576" style="enable-background:new 0 0 2500 576;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFD9D;}
+	.st1{fill:#B6761C;}
+	.st2{fill:#FFE144;}
+	.st3{fill:#FFE144;} 
+</style>
+
+<g id="Layer_x0020_1">
+	<g id="_1627953934336">
+		<g>
+			<polygon class="st0" points="297.5,406.9 596.4,84.3 297.5,576    "></polygon>
+			<polygon class="st1" points="297.7,406.9 0.7,84.3 297.7,576    "></polygon>
+			<polygon class="st2" points="596.4,84.3 0.7,84.3 297.5,406.9    "></polygon>
+			<polygon class="st1" points="421.5,145.7 175.6,145.7 298.1,278.1    "></polygon>
+			<polygon class="st0" points="298.1,132.8 421.2,0 298.1,202.5    "></polygon>
+			<polygon class="st1" points="298.2,132.8 175.9,0 298.2,202.5    "></polygon>
+			<polygon class="st2" points="421.2,0 175.9,0 298.1,132.8    "></polygon>
+		</g>
+		<polygon class="st3" points="1132,477 847.5,156.6 848,468.1 823,468.1 823,91.1 824.6,91.1 1109.1,414 1108.6,98.9 1133,98.9     1133,477   "></polygon>
+		<polygon class="st3" points="1354.7,98.9 1582.5,98.9 1582.5,123.3 1380.2,123.3 1380.2,270 1562.2,270 1562.2,294.4     1380.2,294.4 1380.2,443.7 1589.8,443.7 1589.8,468.1 1354.7,468.1   "></polygon>
+		<polygon class="st3" points="1754.5,468.1 1876.2,278.3 1759.7,98.9 1791.4,98.9 1895.4,258.5 1994.8,98.9 2024.9,98.9     1909,279.9 2031.7,468.1 1999.5,468.1 1890.2,299.6 1785.7,468.1   "></polygon>
+		<path class="st3" d="M2185.2,468.1l156-385.4h2.1l156,385.4h-28.6l-48.4-122.2h-162.8l-48.9,122.2H2185.2L2185.2,468.1z     M2268.9,322H2413l-71.3-181.5L2268.9,322L2268.9,322z"></path>
+	</g>
+</g>
+</svg>

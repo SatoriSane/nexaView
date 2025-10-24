@@ -1,0 +1,26 @@
+{
+  "name": "Nexa View",
+  "version": "1.0.0",
+  "description": "Progressive Web App para consultar balance de direcciones Nexa en tiempo real",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "nexa",
+    "blockchain",
+    "balance",
+    "pwa",
+    "wallet",
+    "cryptocurrency"
+  ],
+  "author": "Nexa View Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
