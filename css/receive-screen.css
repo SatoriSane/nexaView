@@ -11,16 +11,19 @@
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    opacity: 1;
-    transform: translateY(0);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 opacity 0.3s ease;
 }
 
+.receive-screen.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
 .receive-screen.hidden {
-    opacity: 0;
-    transform: translateY(100%); /* Desplaza hacia abajo cuando está oculto */
-    pointer-events: none;
+    display: none; /* Solo para cuando realmente queremos destruirlo */
 }
 
 /* Header */

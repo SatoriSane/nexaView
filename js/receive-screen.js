@@ -20,12 +20,22 @@ export function openReceiveScreen(wallet) {
     
     updateReceiveScreen(wallet);
     
-    // Smooth fade-in
+    // Remover hidden si existía (para que sea visible en el DOM)
     receiveContainer.classList.remove('hidden');
+    
+    // Ocultar main y FAB
     const main = document.querySelector('main');
     const fab = document.getElementById('addWalletBtn');
     if (main) main.style.display = 'none';
     if (fab) fab.style.display = 'none';
+    
+    // Forzar reflow para que el navegador aplique el estado inicial (translateY(100%))
+    receiveContainer.offsetHeight;
+    
+    // Animar la entrada desde abajo
+    requestAnimationFrame(() => {
+        receiveContainer.classList.add('visible');
+    });
     
     generateQR(wallet.address);
     
@@ -49,14 +59,15 @@ export function openReceiveScreen(wallet) {
             }
         }
     };
-        // Solo suscribirse si es la wallet de donación Y NO está en la lista guardada.
-        const isDonationWallet = wallet.address === CONFIG.DONATION_WALLET_ADDRESS;
-        const isWalletTracked = state.savedWallets.some(w => w.address === wallet.address);
-        if (isDonationWallet && !isWalletTracked) {
-            import('./realtime.js').then(module => {
-                module.subscribe(wallet.address);
-            });
-        }
+    
+    // Solo suscribirse si es la wallet de donación Y NO está en la lista guardada.
+    const isDonationWallet = wallet.address === CONFIG.DONATION_WALLET_ADDRESS;
+    const isWalletTracked = state.savedWallets.some(w => w.address === wallet.address);
+    if (isDonationWallet && !isWalletTracked) {
+        import('./realtime.js').then(module => {
+            module.subscribe(wallet.address);
+        });
+    }
 }
 
 
@@ -72,49 +83,49 @@ export function closeReceiveScreen() {
     // Limpiar callback global
     window.receiveScreenCallback = null;
     
-    // Desuscribir solo si es la wallet de donación Y NO está guardada, 
-    // O si es una wallet NO donación que NO está guardada.
-    if (walletToClose) {
-        const isDonationWallet = walletToClose.address === CONFIG.DONATION_WALLET_ADDRESS;
-        const isWalletTracked = state.savedWallets.some(w => w.address === walletToClose.address);
+    // Remover la clase visible para animar la salida
+    receiveContainer.classList.remove('visible');
+    
+    // Esperar a que termine la animación antes de destruir (400ms)
+    setTimeout(() => {
+        // Ocultar completamente
+        receiveContainer.classList.add('hidden');
         
-        // La condición para desuscribir es: 
-        // 1. Es la de Donación Y no está rastreada (suscrita temporalmente en openReceiveScreen)
-        // O: 
-        // 2. NO es la de Donación Y no está rastreada (wallet temporal añadida por el usuario)
-        if (!isWalletTracked) {
-             import('./realtime.js').then(realtimeModule => {
-                realtimeModule.unsubscribe(walletToClose.address);
-            });
-        }
-    }
-    // --------------------------------------------------------------------
-    
-    // Restaurar la vista principal
-    receiveContainer.classList.add('hidden');
-    
-    const main = document.querySelector('main');
-    const fab = document.getElementById('addWalletBtn');
-    if (main) main.style.display = 'block';
-    if (fab) fab.style.display = 'flex';
+        // Restaurar la vista principal
+        const main = document.querySelector('main');
+        const fab = document.getElementById('addWalletBtn');
+        if (main) main.style.display = 'block';
+        if (fab) fab.style.display = 'flex';
 
-    // Destruir el DOM y limpiar el estado
-    if (receiveContainer.parentNode) {
-        receiveContainer.parentNode.removeChild(receiveContainer);
-    }
-    
-    // Limpieza final de referencias globales/de módulo
-    currentWallet = null;
-    receiveContainer = null;
-    
-    if (celebrationTimeout) {
-        clearTimeout(celebrationTimeout);
-        celebrationTimeout = null;
-    }
-    if (qrUpdateTimeout) {
-        clearTimeout(qrUpdateTimeout);
-        qrUpdateTimeout = null;
-    }
+        // Destruir el DOM
+        if (receiveContainer.parentNode) {
+            receiveContainer.parentNode.removeChild(receiveContainer);
+        }
+        
+        // Desuscribir solo si no está rastreada
+        if (walletToClose) {
+            const isWalletTracked = state.savedWallets.some(w => w.address === walletToClose.address);
+            
+            if (!isWalletTracked) {
+                import('./realtime.js').then(realtimeModule => {
+                    realtimeModule.unsubscribe(walletToClose.address);
+                });
+            }
+        }
+        
+        // Limpieza final de referencias globales/de módulo
+        currentWallet = null;
+        receiveContainer = null;
+        
+        if (celebrationTimeout) {
+            clearTimeout(celebrationTimeout);
+            celebrationTimeout = null;
+        }
+        if (qrUpdateTimeout) {
+            clearTimeout(qrUpdateTimeout);
+            qrUpdateTimeout = null;
+        }
+    }, 400); // Duración de la transición CSS (0.4s)
 }
 
 /**
