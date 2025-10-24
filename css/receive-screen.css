@@ -35,6 +35,7 @@
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border);
     position: relative;
+    text-align: center;
 }
 
 .receive-close-btn {
@@ -77,6 +78,8 @@
     color: var(--text-primary);
     letter-spacing: 0.02em;
     transition: opacity 0.15s ease;
+    width: max-content;
+    
 }
 
 /* Body */
@@ -629,9 +632,7 @@
 
 /* Responsive Design */
 @media (max-width: 480px) {
-    .receive-header {
-        padding: 1.25rem 1rem 0.875rem;
-    }
+
     
     .receive-wallet-name {
         font-size: 1rem;
