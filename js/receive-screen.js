@@ -23,11 +23,7 @@ export function openReceiveScreen(wallet) {
     // Remover hidden si existía (para que sea visible en el DOM)
     receiveContainer.classList.remove('hidden');
     
-    // Ocultar main y FAB
-    const main = document.querySelector('main');
-    const fab = document.getElementById('addWalletBtn');
-    if (main) main.style.display = 'none';
-    if (fab) fab.style.display = 'none';
+    // ✅ NO ocultar main y FAB todavía - dejar que la animación se sobreponga
     
     // Forzar reflow para que el navegador aplique el estado inicial (translateY(100%))
     receiveContainer.offsetHeight;
@@ -36,6 +32,15 @@ export function openReceiveScreen(wallet) {
     requestAnimationFrame(() => {
         receiveContainer.classList.add('visible');
     });
+    
+    // ✅ Ocultar main y FAB DESPUÉS de que la animación haya terminado (o durante)
+    // Esto evita el parpadeo y hace que la pantalla se sobreponga naturalmente
+    setTimeout(() => {
+        const main = document.querySelector('main');
+        const fab = document.getElementById('addWalletBtn');
+        if (main) main.style.display = 'none';
+        if (fab) fab.style.display = 'none';
+    }, 200); // A mitad de la animación (400ms total)
     
     generateQR(wallet.address);
     
@@ -83,6 +88,12 @@ export function closeReceiveScreen() {
     // Limpiar callback global
     window.receiveScreenCallback = null;
     
+    // ✅ CAMBIO: Restaurar la vista principal INMEDIATAMENTE
+    const main = document.querySelector('main');
+    const fab = document.getElementById('addWalletBtn');
+    if (main) main.style.display = 'block';
+    if (fab) fab.style.display = 'flex';
+    
     // Remover la clase visible para animar la salida
     receiveContainer.classList.remove('visible');
     
@@ -90,12 +101,6 @@ export function closeReceiveScreen() {
     setTimeout(() => {
         // Ocultar completamente
         receiveContainer.classList.add('hidden');
-        
-        // Restaurar la vista principal
-        const main = document.querySelector('main');
-        const fab = document.getElementById('addWalletBtn');
-        if (main) main.style.display = 'block';
-        if (fab) fab.style.display = 'flex';
 
         // Destruir el DOM
         if (receiveContainer.parentNode) {

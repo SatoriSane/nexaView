@@ -21,7 +21,7 @@ export function initRealtimeStatus(elements, onConnectionChange) {
 
 /* ===================== CONNECT ===================== */
 export function connect(onBalanceUpdate) {
-  balanceUpdateCallback = onBalanceUpdate; // ← ¡AÑADE ESTA LÍNEA!
+  balanceUpdateCallback = onBalanceUpdate;
   if (ws && ws.readyState === WebSocket.OPEN) return;
   
   if (statusElements) {
@@ -31,8 +31,9 @@ export function connect(onBalanceUpdate) {
   ws = new WebSocket(WS_URL);
   console.log("🔌 Connecting to Rostrum...");
   
-  ws.onopen = () => {
+  ws.onopen = async () => {
     console.log("✅ Connected to Rostrum WebSocket");
+    const wasReconnecting = reconnectAttempts > 0;
     reconnectAttempts = 0;
     
     if (statusElements) {
@@ -41,6 +42,25 @@ export function connect(onBalanceUpdate) {
     
     // Notificar que el WS está conectado
     if (uiUpdateCallback) uiUpdateCallback('connected');
+    
+    // ✅ Si es una reconexión, sincronizar balances primero
+    if (wasReconnecting && state.savedWallets?.length) {
+      console.log('🔄 Reconnected - syncing balances...');
+      
+      for (const wallet of state.savedWallets) {
+        try {
+          const balance = await fetchBalance(wallet.address);
+          if (balance !== null) {
+            updateWalletBalance(wallet.address, balance);
+            if (balanceUpdateCallback) {
+              balanceUpdateCallback(wallet.address, balance);
+            }
+          }
+        } catch (err) {
+          console.warn(`⚠️ Sync failed for ${wallet.address}`);
+        }
+      }
+    }
     
     // Suscribimos todas las direcciones guardadas
     if (state.savedWallets?.length) {
@@ -64,7 +84,8 @@ export function connect(onBalanceUpdate) {
         }
         if (updated !== null) {
           updateWalletBalance(address, updated);
-          if (balanceUpdateCallback) balanceUpdateCallback(address, updated);        }
+          if (balanceUpdateCallback) balanceUpdateCallback(address, updated);
+        }
       }
     } catch (err) {
       console.warn("⚠️ Error processing message:", err);
