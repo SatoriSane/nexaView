@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER PARA PWA =====
 // Versión del caché - incrementar cuando se actualice la app
-const CACHE_VERSION = 'nexaView-v2.4.7';
+const CACHE_VERSION = 'nexaView-v2.4.8';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -110,24 +110,27 @@ self.addEventListener('fetch', (event) => {
     const criticalFiles = [
         '/index.html',
         '/css/base.css',
+        '/css/empty-state.css',
+        '/css/footer.css',
         '/css/header.css',
         '/css/input.css',
-        '/css/wallet.css',
-        '/css/footer.css',
-        '/css/notifications.css',
         '/css/modal.css',
+        '/css/notifications.css',
+        '/css/receive-screen.css',
+        '/css/wallet.css',
+        '/js/add-wallet-modal.js',
         '/js/app.js',
+        '/js/balance-monitor.js',
+        '/js/balanceClient.js',
         '/js/config.js',
+        '/js/edit-wallet-name.js',
         '/js/pwa.js',
+        '/js/realtime.js',
+        '/js/receive-screen.js',
+        '/js/storage.js',
         '/js/ui.js',
         '/js/wallets.js',
-        '/js/balanceClient.js',
-        '/js/add-wallet-modal.js',
-        '/js/edit-wallet-name.js',
-        '/js/storage.js',
-        '/js/receive-screen.js',
-        '/js/send-screen.css',
-        '/'
+        '/js'
     ];
     const isCritical = criticalFiles.some(file => url.pathname === file || url.pathname.endsWith(file));
     
