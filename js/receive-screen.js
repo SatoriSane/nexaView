@@ -688,9 +688,6 @@ export function showPaymentReceived(amount) {
     qrWrapper.appendChild(statusReceived);
     statusReceived.classList.remove('hidden');
 
-    // Trigger success particles animation
-    createSuccessParticles(qrWrapper, statusReceived);
-
     // Auto-restore after 5 seconds
     if (celebrationTimeout) {
         clearTimeout(celebrationTimeout);
@@ -699,71 +696,6 @@ export function showPaymentReceived(amount) {
     celebrationTimeout = setTimeout(() => {
         restoreNormalState(statusReceived, statusWaiting, qrWrapper);
     }, 5000);
-}
-
-/**
- * Create success particles animation with colors based on payment status
- */
-function createSuccessParticles(container, statusReceived) {
-    // Determine particle colors based on payment status
-    let colors;
-    if (statusReceived.classList.contains('payment-exact')) {
-        colors = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
-    } else if (statusReceived.classList.contains('payment-less')) {
-        colors = ['#fbbf24', '#fcd34d', '#fde68a', '#fef3c7', '#f59e0b'];
-    } else if (statusReceived.classList.contains('payment-more')) {
-        colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#2563eb'];
-    } else {
-        colors = ['#10b981', '#fbbf24', '#60a5fa', '#f59e0b', '#34d399'];
-    }
-    
-    const particleCount = 24;
-    
-    const rect = container.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'success-particle';
-        
-        const angle = (Math.PI * 2 * i) / particleCount;
-        const velocity = 80 + Math.random() * 40;
-        const size = 4 + Math.random() * 6;
-        
-        particle.style.cssText = `
-            position: absolute;
-            width: ${size}px;
-            height: ${size}px;
-            background: ${colors[i % colors.length]};
-            border-radius: 50%;
-            left: ${centerX}px;
-            top: ${centerY}px;
-            pointer-events: none;
-            z-index: 12;
-            box-shadow: 0 0 10px ${colors[i % colors.length]};
-        `;
-        
-        container.appendChild(particle);
-        
-        const deltaX = Math.cos(angle) * velocity;
-        const deltaY = Math.sin(angle) * velocity;
-        
-        particle.animate([
-            { 
-                transform: 'translate(0, 0) scale(1)',
-                opacity: 1
-            },
-            { 
-                transform: `translate(${deltaX}px, ${deltaY}px) scale(0)`,
-                opacity: 0
-            }
-        ], {
-            duration: 800 + Math.random() * 400,
-            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            fill: 'forwards'
-        }).onfinish = () => particle.remove();
-    }
 }
 
 /**

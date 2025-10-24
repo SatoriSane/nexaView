@@ -23,7 +23,7 @@
 }
 
 .receive-screen.hidden {
-    display: none; /* Solo para cuando realmente queremos destruirlo */
+    display: none;
 }
 
 /* Header */
@@ -169,8 +169,8 @@
 }
 .address-compact.hide-or-dim {
     opacity: 0;
-    pointer-events: none; /* Deshabilita clics mientras está oculto */
-    transition: opacity 0.3s ease-out; /* Animación suave */
+    pointer-events: none;
+    transition: opacity 0.3s ease-out;
 }
 .qr-wallet-text {
     flex: 1;
@@ -222,9 +222,6 @@
     transform: scale(0.95);
 }
 
-.btn-copy-compact.copied {
-}
-
 .btn-copy-compact svg {
     width: 1rem;
     height: 1rem;
@@ -267,7 +264,7 @@
     outline: none;
     text-align: center;
     padding: 1rem 0;
-    font-size: 2rem; /* Aumentado */
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 0.04em;
@@ -292,9 +289,6 @@
     text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
     opacity: 0.9;
 }
-
-
-
 
 
 /* Remove number input arrows */
@@ -399,7 +393,14 @@
     border: none;
     box-shadow: none;
     padding: 0;
+    
+    /* REFUERZO DE CENTRADO GENERAL */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    text-align: center;
+    
     transition: none;
     animation: successPulse 0.6s ease-out;
 }
@@ -655,20 +656,23 @@
         font-size: 0.8125rem;
     }
     
-.amount-input {
-    font-size: 1.75rem; /* antes: 1.125rem */
-    padding: 0.875rem 0;
-}
-  .amount-currency {
-    right: 1rem;
-    font-size: 0.9rem;
-}  
+    .amount-input {
+        font-size: 1.75rem;
+        padding: 0.875rem 0;
+    }
+    .amount-currency {
+        right: 1rem;
+        font-size: 0.9rem;
+    }  
+    
     .status-received {
         padding: 1.5rem;
     }
     
+    /* 🔥 CORRECCIÓN CLAVE: Eliminamos min-width para que se ajuste al 100% del QR (220px) */
     .status-received.celebrating {
-        min-width: 260px;
+        /* ¡Se ha eliminado min-width: 260px; que causaba el desbordamiento! */
+        text-align: center; /* Refuerza el centrado del texto */
     }
     
     .success-checkmark {
@@ -683,6 +687,17 @@
     .status-notification {
         font-size: 0.8125rem;
         padding: 0.625rem 1rem;
+        
+        /* 🔥 REFUERZO DE CENTRADO DE BADGE */
+        max-width: 90%; 
+        margin-left: auto;
+        margin-right: auto;
+        justify-content: center; 
+    }
+    
+    .status-notification-text {
+        flex: none; /* Asegura que el texto no se extienda sin necesidad */
+        text-align: center;
     }
 }
 
