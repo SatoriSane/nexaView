@@ -1,13 +1,13 @@
 // js/receive-screen.js
 import { truncateWalletAddress, setupWalletAddressToggle } from './ui.js'; 
 import { CONFIG, state } from './config.js';
-import { fetchBalance } from './balanceClient.js'; // ← NUEVO: importar para sincronización inicial
+import { fetchBalance } from './balanceClient.js';
 
 let currentWallet = null;
 let receiveContainer = null;
 let celebrationTimeout = null;
 let qrUpdateTimeout = null;
-let initialBalance = null; // ← NUEVO: guardar balance inicial
+let initialBalance = null;
 
 /**
  * Opens the receive screen for a specific wallet
@@ -593,6 +593,116 @@ function fallbackCopyText(text) {
 }
 
 /**
+ * 🎊 Crea una celebración épica de corazones desde abajo
+ */
+function createDonationCelebration() {
+    const heartCount = 30; // Cantidad de corazones
+    const sizes = ['small', 'small', 'medium', 'medium', 'large', 'xlarge'];
+    const speeds = ['slow', 'normal', 'fast', 'veryfast'];
+    const drifts = ['', 'drift-left', 'drift-right'];
+    
+    // 🎨 Decidir el esquema de colores para TODA la celebración
+    const random = Math.random();
+    let colorScheme;
+    
+    if (random < 0.30) {
+        // 30% - Solo dorados
+        colorScheme = 'gold-only';
+    } else if (random < 0.60) {
+        // 30% - Solo rojos
+        colorScheme = 'red-only';
+    } else if (random < 0.80) {
+        // 20% - Mix dorado y rojo
+        colorScheme = 'gold-red-mix';
+    } else {
+        // 20% - Todos los colores (arcoíris)
+        colorScheme = 'rainbow';
+    }
+    
+    console.log(`🎨 Color scheme: ${colorScheme}`);
+    
+    for (let i = 0; i < heartCount; i++) {
+        setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'donation-heart';
+            
+            // 🎨 Aplicar color según el esquema decidido
+            switch (colorScheme) {
+                case 'gold-only':
+                    // Sin clase adicional = dorado por defecto
+                    break;
+                    
+                case 'red-only':
+                    heart.classList.add('red');
+                    break;
+                    
+                case 'gold-red-mix':
+                    // 50/50 entre dorado y rojo
+                    if (Math.random() > 0.5) {
+                        heart.classList.add('red');
+                    }
+                    break;
+                    
+                case 'rainbow':
+                    // Todos los colores aleatoriamente
+                    const colors = ['red', 'purple', 'blue', 'green', 'pink', 'orange'];
+                    // 70% probabilidad de color, 30% de dorado
+                    if (Math.random() > 0.3) {
+                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                        heart.classList.add(randomColor);
+                    }
+                    break;
+            }
+            
+            // Tamaño aleatorio
+            const size = sizes[Math.floor(Math.random() * sizes.length)];
+            heart.classList.add(`size-${size}`);
+            
+            // Velocidad aleatoria
+            const speed = speeds[Math.floor(Math.random() * speeds.length)];
+            heart.classList.add(`speed-${speed}`);
+            
+            // Dirección aleatoria
+            const drift = drifts[Math.floor(Math.random() * drifts.length)];
+            if (drift) heart.classList.add(drift);
+            
+            // Algunos con pulso
+            if (Math.random() > 0.7) {
+                heart.classList.add('pulse');
+            }
+            
+            // SVG del corazón
+            heart.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            `;
+            
+            // Posición horizontal aleatoria
+            const leftPosition = Math.random() * 100;
+            heart.style.left = `${leftPosition}%`;
+            
+            // Rotación aleatoria
+            const rotation = (Math.random() * 720) - 360; // -360 a 360 grados
+            heart.style.setProperty('--rotation', `${rotation}deg`);
+            
+            // Agregar al body
+            document.body.appendChild(heart);
+            
+            // Remover después de la animación
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
+        }, i * 100); // Escalonar aparición cada 100ms
+    }
+    
+    // Haptic feedback épico
+    if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100, 50, 100, 50, 200]);
+    }
+}
+
+/**
  * Show payment received with premium celebration animation
  */
 export function showPaymentReceived(amount) {
@@ -608,6 +718,13 @@ export function showPaymentReceived(amount) {
     const addressCompact = document.querySelector('.address-compact');
     
     if (!qrWrapper || !statusReceived) return;
+    
+    // 🎊 Detectar si es la wallet de donación
+    const isDonationWallet = currentWallet?.address === CONFIG.DONATION_WALLET_ADDRESS;
+    if (isDonationWallet) {
+        console.log('🎉 DONATION RECEIVED! Triggering celebration...');
+        createDonationCelebration();
+    }
 
     const nexaAmount = amount / 100;
     const formattedAmount = nexaAmount.toLocaleString('en-US', { 

@@ -1,0 +1,383 @@
+/* ✅ Botón de donación */
+.donate-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-dark);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative; /* ← Para posicionar corazones flotantes */
+  overflow: visible; /* ← Permitir que corazones salgan del botón */
+}
+
+.donate-btn svg {
+  width: 14px;
+  height: 14px;
+  transition: all 0.3s ease;
+}
+
+.donate-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--gold);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.donate-btn:hover svg {
+  fill: var(--gold);
+  color: var(--gold);
+  transform: scale(1.2);
+}
+
+.donate-btn:active {
+  transform: translateY(0);
+}
+
+/* 🎈 Corazón flotante animado */
+.floating-heart {
+  position: fixed; /* ← Fixed para que persista sobre receive-screen */
+  pointer-events: none; /* ← No interfiere con clics */
+  z-index: 99999; /* ← Por encima de todo (receive-screen es z-index: 1000) */
+  animation: floatAndFade 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform, opacity;
+}
+
+.floating-heart svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--gold);
+  filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.6));
+}
+
+/* 🎬 Animación de flotación y desvanecimiento */
+@keyframes floatAndFade {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(10px, -80px) scale(1.3) rotate(15deg);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translate(-5px, -160px) scale(1.1) rotate(-10deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(15px, -250px) scale(0.8) rotate(20deg);
+    opacity: 0;
+  }
+}
+
+/* 🎨 Variantes de animación (para múltiples corazones) */
+.floating-heart.variant-1 {
+  animation-duration: 2.8s;
+  animation-timing-function: cubic-bezier(0.33, 0.5, 0.5, 0.95);
+}
+
+.floating-heart.variant-1 svg {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes floatAndFade {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(-15px, -70px) scale(1.4) rotate(-12deg);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(8px, -140px) scale(1.2) rotate(8deg);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translate(-10px, -200px) scale(0.9) rotate(-15deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(20px, -260px) scale(0.6) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+.floating-heart.variant-2 {
+  animation-duration: 3.2s;
+  animation-timing-function: cubic-bezier(0.2, 0.55, 0.4, 0.9);
+}
+
+.floating-heart.variant-2 svg {
+  width: 18px;
+  height: 18px;
+}
+
+@keyframes floatAndFade2 {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(20px, -90px) scale(1.5) rotate(20deg);
+    opacity: 0.9;
+  }
+  65% {
+    transform: translate(-10px, -180px) scale(1) rotate(-5deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(10px, -270px) scale(0.7) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+.floating-heart.variant-2 {
+  animation-name: floatAndFade2;
+}
+
+/* 🎊 CELEBRACIÓN DE DONACIÓN - Corazones desde abajo */
+.donation-heart {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  bottom: -50px; /* Empiezan desde fuera de la pantalla */
+  animation: riseAndFade 4s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.donation-heart svg {
+  fill: var(--gold);
+  filter: drop-shadow(0 2px 12px rgba(212, 175, 55, 0.8));
+}
+
+/* 🔴 Variante roja */
+.donation-heart.red svg {
+  fill: #ef4444; /* Rojo vibrante */
+  filter: drop-shadow(0 2px 12px rgba(239, 68, 68, 0.8));
+}
+
+/* 💜 Variante púrpura */
+.donation-heart.purple svg {
+  fill: #a855f7; /* Púrpura */
+  filter: drop-shadow(0 2px 12px rgba(168, 85, 247, 0.8));
+}
+
+/* 💙 Variante azul */
+.donation-heart.blue svg {
+  fill: #3b82f6; /* Azul */
+  filter: drop-shadow(0 2px 12px rgba(59, 130, 246, 0.8));
+}
+
+/* 💚 Variante verde */
+.donation-heart.green svg {
+  fill: #10b981; /* Verde */
+  filter: drop-shadow(0 2px 12px rgba(16, 185, 129, 0.8));
+}
+
+/* 🩷 Variante rosa */
+.donation-heart.pink svg {
+  fill: #ec4899; /* Rosa */
+  filter: drop-shadow(0 2px 12px rgba(236, 72, 153, 0.8));
+}
+
+/* 🧡 Variante naranja */
+.donation-heart.orange svg {
+  fill: #f97316; /* Naranja */
+  filter: drop-shadow(0 2px 12px rgba(249, 115, 22, 0.8));
+}
+
+/* Tamaños variados de corazones */
+.donation-heart.size-small svg {
+  width: 20px;
+  height: 20px;
+}
+
+.donation-heart.size-medium svg {
+  width: 32px;
+  height: 32px;
+}
+
+.donation-heart.size-large svg {
+  width: 48px;
+  height: 48px;
+}
+
+.donation-heart.size-xlarge svg {
+  width: 64px;
+  height: 64px;
+}
+
+/* 🎬 Animación de ascenso desde abajo */
+@keyframes riseAndFade {
+  0% {
+    transform: translateY(0) scale(0.8) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) scale(1.2) rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+/* Variantes de velocidad y trayectoria */
+.donation-heart.speed-slow {
+  animation-duration: 5s;
+}
+
+.donation-heart.speed-normal {
+  animation-duration: 4s;
+}
+
+.donation-heart.speed-fast {
+  animation-duration: 3s;
+}
+
+.donation-heart.speed-veryfast {
+  animation-duration: 2.5s;
+}
+
+/* Variantes de movimiento lateral */
+.donation-heart.drift-left {
+  animation-name: riseAndFadeLeft;
+}
+
+.donation-heart.drift-right {
+  animation-name: riseAndFadeRight;
+}
+
+@keyframes riseAndFadeLeft {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.8) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50vh) translateX(-80px) scale(1) rotate(var(--rotation));
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(-150px) scale(1.2) rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+@keyframes riseAndFadeRight {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.8) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50vh) translateX(80px) scale(1) rotate(var(--rotation));
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(150px) scale(1.2) rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+/* Animación de pulso para corazones grandes */
+.donation-heart.pulse {
+  animation: riseAndFadePulse 4s ease-out forwards;
+}
+
+@keyframes riseAndFadePulse {
+  0% {
+    transform: translateY(0) scale(0.8) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(-10vh) scale(1.2) rotate(5deg);
+  }
+  15% {
+    transform: translateY(-15vh) scale(1) rotate(-5deg);
+  }
+  20% {
+    transform: translateY(-20vh) scale(1.3) rotate(5deg);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) scale(1.2) rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+/* 📱 Responsive */
+@media (max-width: 480px) {
+  .donate-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+  
+  .donate-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .floating-heart svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Corazones de celebración más pequeños en móvil */
+  .donation-heart.size-small svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .donation-heart.size-medium svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .donation-heart.size-large svg {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .donation-heart.size-xlarge svg {
+    width: 48px;
+    height: 48px;
+  }
+  
+  @keyframes floatAndFade {
+    0% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+      opacity: 1;
+    }
+    30% {
+      transform: translate(8px, -60px) scale(1.2) rotate(12deg);
+      opacity: 0.9;
+    }
+    60% {
+      transform: translate(-4px, -120px) scale(1) rotate(-8deg);
+      opacity: 0.6;
+    }
+    100% {
+      transform: translate(12px, -180px) scale(0.7) rotate(15deg);
+      opacity: 0;
+    }
+  }
+}

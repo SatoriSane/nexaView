@@ -77,43 +77,9 @@
     gap: 12px;
 }
 
-/* ✅ Botón de donación */
-.donate-btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border-radius: 6px;
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    background: rgba(212, 175, 55, 0.1);
-    color: var(--gold);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
+/* ✅ Botón de donación 
+VER heart.css*/
 
-.donate-btn svg {
-    width: 14px;
-    height: 14px;
-    transition: all 0.3s ease;
-}
-
-.donate-btn:hover {
-    background: rgba(212, 175, 55, 0.2);
-    border-color: var(--gold);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-}
-
-.donate-btn:hover svg {
-    fill: var(--gold);
-    transform: scale(1.1);
-}
-
-.donate-btn:active {
-    transform: translateY(0);
-}
 
 /* Botón instalar app */
 .install-app-btn {
