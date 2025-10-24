@@ -1,5 +1,5 @@
 //balanceClient.js
-import { showError, setLoadingState } from './ui.js';
+import { showError, setLoadingState, setRefreshLoading } from './ui.js';
 
 export async function fetchBalance(address, elements) {
     if (!address || !address.startsWith('nexa:')) {
@@ -8,6 +8,10 @@ export async function fetchBalance(address, elements) {
         return null;
     }
 
+    // 1. 🔥 INICIAR CARGA: Hace girar y muestra el botón de la wallet
+    setRefreshLoading(address, true); 
+    
+    // (Opcional: Si 'elements' se usa para un spinner GLOBAL, sigue en try/finally)
     try {
         if (elements) setLoadingState(elements, true);
 
@@ -30,6 +34,10 @@ export async function fetchBalance(address, elements) {
         if (elements) showError(elements, 'Network error');
         return null;
     } finally {
+        // 2. 🔥 DETENER CARGA: Detiene el giro y oculta el botón de la wallet
+        setRefreshLoading(address, false); 
+        
+        // (Continúa usando 'elements' si maneja un estado global)
         if (elements) setLoadingState(elements, false);
     }
 }

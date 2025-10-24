@@ -153,3 +153,35 @@ export function formatRelativeTime(timestamp) {
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
 }
+
+// Función para obtener la tarjeta de la wallet
+export function getWalletCard(address) {
+    return document.querySelector(`.wallet-item .wallet-address[data-full-address="${address}"]`)
+                   ?.closest('.wallet-item');
+}
+
+/**
+ * Controla la animación de carga y la visibilidad del botón de refresh.
+ * Esto asegura que el botón aparezca, gire y luego se oculte, sin saltos.
+ * @param {string} address - Dirección de la wallet
+ * @param {boolean} isLoading - true para iniciar giro y mostrar, false para detener y ocultar.
+ */
+export function setRefreshLoading(address, isLoading) {
+    const walletCard = getWalletCard(address);
+    if (!walletCard) return;
+
+    const refreshBtn = walletCard.querySelector('.wallet-btn-refresh');
+    const refreshIcon = walletCard.querySelector('.wallet-btn-refresh .refresh-icon');
+
+    if (refreshBtn && refreshIcon) {
+        if (isLoading) {
+            // Muestra el botón (.show) y activa el giro (.loading)
+            refreshBtn.classList.add('show');
+            refreshIcon.classList.add('loading');
+        } else {
+            // Detiene el giro y oculta el botón
+            refreshBtn.classList.remove('show');
+            refreshIcon.classList.remove('loading');
+        }
+    }
+}
