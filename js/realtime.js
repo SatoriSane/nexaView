@@ -43,27 +43,25 @@ export function connect(onBalanceUpdate) {
     // Notificar que el WS está conectado
     if (uiUpdateCallback) uiUpdateCallback('connected');
     
-    // ✅ Si es una reconexión, sincronizar balances primero
-    if (wasReconnecting && state.savedWallets?.length) {
-      console.log('🔄 Reconnected - syncing balances...');
-      
-      for (const wallet of state.savedWallets) {
-        try {
-          const balance = await fetchBalance(wallet.address);
-          if (balance !== null) {
-            updateWalletBalance(wallet.address, balance);
-            if (balanceUpdateCallback) {
-              balanceUpdateCallback(wallet.address, balance);
-            }
-          }
-        } catch (err) {
-          console.warn(`⚠️ Sync failed for ${wallet.address}`);
-        }
+// ✅ Siempre sincronizar balances al conectar o reconectar
+if (state.savedWallets?.length) {
+  console.log('🔄 Syncing balances...');
+  for (const wallet of state.savedWallets) {
+    try {
+      const balance = await fetchBalance(wallet.address);
+      if (balance !== null) {
+        updateWalletBalance(wallet.address, balance);
+        if (balanceUpdateCallback) balanceUpdateCallback(wallet.address, balance);
       }
+    } catch (err) {
+      console.warn(`⚠️ Sync failed for ${wallet.address}`);
     }
-    
+  }
+}
+
     // Suscribimos todas las direcciones guardadas
     if (state.savedWallets?.length) {
+      console.log('📡 Subscribing to saved addresses...');
       state.savedWallets.forEach(wallet => {
         subscribe(wallet.address);
       });
