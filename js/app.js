@@ -5,7 +5,7 @@ import { loadSavedWallets, refreshAllWallets } from './wallets.js';
 import { setupWalletModal } from './add-wallet-modal.js';
 import { adjustBalanceFontSize, formatRelativeTime } from './ui.js';
 import { formatBalance } from './balanceClient.js';
-import { initRealtimeStatus, connect } from './realtime.js';
+import { initRealtimeStatus, connect, getConnectionStatus, reconnect, updateStatus } from './realtime.js';
 import { openReceiveScreen } from './receive-screen.js';
 import { fetchBalance } from './balanceClient.js';
 import { updateWalletBalance } from './storage.js';
@@ -170,49 +170,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ✅ Luego conectar WebSocket (ahora sí se suscriben correctamente)
   connect(onBalanceUpdate);
 
-// 🔄 Actualizar balances y estado del footer al volver a la app
+// 🔄 Reintentar conexión y sincronizar balances al volver a la app
 document.addEventListener('visibilitychange', async () => {
-  // Solo actuar cuando la app vuelve a estar visible
-  if (document.hidden) return;
+  if (document.hidden) return; // Solo actuar al volver a primer plano
 
-  console.log('🔄 App visible again - syncing balances...');
+  console.log('🔄 App visible again — checking connection and syncing balances...');
 
   const status = getConnectionStatus();
 
-  // ✅ Si el socket sigue abierto, restaurar el estado visual correcto
-  if (status === 'connected' && state.savedWallets?.length) {
-    console.log('✅ WebSocket still connected — restoring live update indicator');
-    updateStatus(
-      { 
-        statusIndicator: statusElements.statusIndicator, 
-        statusText: statusElements.statusText 
-      },
-      'Live updates active',
-      'connected'
-    );
-  } 
-  // ❌ Si no está conectado, mostrar estado de reconexión o error
-  else if (status !== 'connected') {
-    console.warn('⚠️ Socket appears disconnected — showing reconnecting status');
-    updateStatus(
-      { 
-        statusIndicator: statusElements.statusIndicator, 
-        statusText: statusElements.statusText 
-      },
-      'Reconnecting...',
-      'connecting'
-    );
-    reconnect();
+  // Referencia local a los elementos del footer
+  const statusUI = {
+    statusIndicator: elements.statusIndicator,
+    statusText: elements.statusText
+  };
+
+  if (status === 'connected') {
+    console.log('✅ WebSocket still connected — restoring UI');
+    updateStatus(statusUI, 'Live updates active', 'connected');
+  } else {
+    console.warn('⚠️ WebSocket disconnected or zombie — forcing full reconnect');
+    updateStatus(statusUI, 'Reconnecting...', 'connecting');
+
+    // 🔁 Cerrar conexión rota y reconectar con callback global
+    try {
+      disconnect();
+      await new Promise(r => setTimeout(r, 600)); // Pequeño delay para limpiar
+      connect(onBalanceUpdate);
+    } catch (err) {
+      console.error('❌ Error during reconnect:', err);
+    }
   }
 
-  // 🔁 Sincronizar balances de todas las wallets
+  // 🔁 Refrescar balances por seguridad
   if (state.savedWallets?.length) {
+    console.log('🔄 Refreshing wallet balances after resume...');
     for (const wallet of state.savedWallets) {
       try {
         const balance = await fetchBalance(wallet.address);
         if (balance !== null) {
           updateWalletBalance(wallet.address, balance);
-          if (balanceUpdateCallback) balanceUpdateCallback(wallet.address, balance);
+          onBalanceUpdate(wallet.address, balance);
         }
       } catch (err) {
         console.warn(`⚠️ Could not refresh ${wallet.address}:`, err);
@@ -220,6 +217,7 @@ document.addEventListener('visibilitychange', async () => {
     }
   }
 });
+
 
 
   // Inicializar modal de agregar wallet
