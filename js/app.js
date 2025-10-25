@@ -170,23 +170,57 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ✅ Luego conectar WebSocket (ahora sí se suscriben correctamente)
   connect(onBalanceUpdate);
 
-  // 🔄 Actualizar balances instantáneamente al volver a la app
-  document.addEventListener('visibilitychange', async () => {
-    if (!document.hidden && state.savedWallets?.length) {
-      console.log('🔄 App visible again - syncing balances...');
-      for (const wallet of state.savedWallets) {
-        try {
-          const balance = await fetchBalance(wallet.address);
-          if (balance !== null) {
-            onBalanceUpdate(wallet.address, balance);
-            updateWalletBalance(wallet.address, balance);
-          }
-        } catch (err) {
-          console.warn(`⚠️ Could not refresh ${wallet.address}:`, err);
+// 🔄 Actualizar balances y estado del footer al volver a la app
+document.addEventListener('visibilitychange', async () => {
+  // Solo actuar cuando la app vuelve a estar visible
+  if (document.hidden) return;
+
+  console.log('🔄 App visible again - syncing balances...');
+
+  const status = getConnectionStatus();
+
+  // ✅ Si el socket sigue abierto, restaurar el estado visual correcto
+  if (status === 'connected' && state.savedWallets?.length) {
+    console.log('✅ WebSocket still connected — restoring live update indicator');
+    updateStatus(
+      { 
+        statusIndicator: statusElements.statusIndicator, 
+        statusText: statusElements.statusText 
+      },
+      'Live updates active',
+      'connected'
+    );
+  } 
+  // ❌ Si no está conectado, mostrar estado de reconexión o error
+  else if (status !== 'connected') {
+    console.warn('⚠️ Socket appears disconnected — showing reconnecting status');
+    updateStatus(
+      { 
+        statusIndicator: statusElements.statusIndicator, 
+        statusText: statusElements.statusText 
+      },
+      'Reconnecting...',
+      'connecting'
+    );
+    reconnect();
+  }
+
+  // 🔁 Sincronizar balances de todas las wallets
+  if (state.savedWallets?.length) {
+    for (const wallet of state.savedWallets) {
+      try {
+        const balance = await fetchBalance(wallet.address);
+        if (balance !== null) {
+          updateWalletBalance(wallet.address, balance);
+          if (balanceUpdateCallback) balanceUpdateCallback(wallet.address, balance);
         }
+      } catch (err) {
+        console.warn(`⚠️ Could not refresh ${wallet.address}:`, err);
       }
     }
-  });
+  }
+});
+
 
   // Inicializar modal de agregar wallet
   setupWalletModal(elements);

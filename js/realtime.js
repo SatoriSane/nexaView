@@ -18,6 +18,46 @@ const pendingUpdates = new Map(); // address -> {timer, statusHash, count}
 const UPDATE_DEBOUNCE_MS = 3500; // Esperar 3500ms para agrupar notificaciones
 const MAX_PENDING_MS = 6000; // Máximo 6s de espera
 
+/* ===================== HEARTBEAT CHECK ===================== */
+let heartbeatInterval = null;
+let lastPongTime = Date.now();
+
+function startHeartbeat() {
+  if (heartbeatInterval) return; // Evitar duplicados
+
+  heartbeatInterval = setInterval(() => {
+    const now = Date.now();
+    const elapsed = now - lastPongTime;
+
+    // Si está conectado, enviamos un ping
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      try {
+        ws.send(JSON.stringify({ method: "ping", id: Date.now() }));
+        console.log("💓 Sent heartbeat ping");
+      } catch (err) {
+        console.warn("⚠️ Error sending ping:", err);
+      }
+
+      // Si pasó demasiado tiempo sin mensaje, reconectar
+      if (elapsed > 30000) { // 30 s sin actividad
+        console.warn("💀 WebSocket heartbeat timeout — reconnecting...");
+        ws.close();
+      }
+    } else {
+      console.log("🔁 Heartbeat found closed socket — reconnecting...");
+      reconnect();
+    }
+  }, 60000); // cada 30 s
+}
+
+function stopHeartbeat() {
+  if (heartbeatInterval) {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = null;
+  }
+}
+
+
 /* ===================== INIT STATUS ===================== */
 export function initRealtimeStatus(elements, onConnectionChange) {
   statusElements = elements;
@@ -133,45 +173,55 @@ export function connect(onBalanceUpdate) {
   ws = new WebSocket(WS_URL);
   console.log("🔌 Connecting to Rostrum...");
   
-  ws.onopen = async () => {
-    console.log("✅ Connected to Rostrum WebSocket");
-    reconnectAttempts = 0;
-    
-    if (statusElements) {
-      updateStatus(statusElements, 'Live updates active', 'connected');
-    }
-    
-    if (uiUpdateCallback) uiUpdateCallback('connected');
-    
-    // ✅ Sincronizar balances al conectar
-    if (state.savedWallets?.length) {
-      console.log('🔄 Syncing balances...');
-      for (const wallet of state.savedWallets) {
-        try {
-          const balance = await fetchBalance(wallet.address);
-          if (balance !== null) {
-            updateWalletBalance(wallet.address, balance);
-            if (balanceUpdateCallback) balanceUpdateCallback(wallet.address, balance);
-          }
-        } catch (err) {
-          console.warn(`⚠️ Sync failed for ${wallet.address}`);
+ws.onopen = async () => {
+  console.log("✅ Connected to Rostrum WebSocket");
+  reconnectAttempts = 0;
+  startHeartbeat(); // 💓 Comienza a vigilar el estado de la conexión
+  // 🔄 Limpiar cualquier temporizador de reconexión pendiente
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  // ✅ Mostrar estado correcto
+  if (statusElements) {
+    updateStatus(statusElements, 'Live updates active', 'connected');
+  }
+
+  if (uiUpdateCallback) uiUpdateCallback('connected');
+
+  // 🧩 Reconfirmar suscripciones activas (por si el socket se recreó)
+  if (state.savedWallets?.length) {
+    console.log('📡 Subscribing to saved addresses...');
+    state.savedWallets.forEach(wallet => {
+      subscribe(wallet.address);
+    });
+  }
+
+  // ✅ Sincronizar balances inmediatamente después de conectar
+  if (state.savedWallets?.length) {
+    console.log('🔄 Syncing balances...');
+    for (const wallet of state.savedWallets) {
+      try {
+        const balance = await fetchBalance(wallet.address);
+        if (balance !== null) {
+          updateWalletBalance(wallet.address, balance);
+          if (balanceUpdateCallback) balanceUpdateCallback(wallet.address, balance);
         }
+      } catch (err) {
+        console.warn(`⚠️ Sync failed for ${wallet.address}:`, err);
       }
     }
-    
-    // Suscribir todas las direcciones guardadas
-    if (state.savedWallets?.length) {
-      console.log('📡 Subscribing to saved addresses...');
-      state.savedWallets.forEach(wallet => {
-        subscribe(wallet.address);
-      });
-    }
-  };
+  }
+
+  console.log('🟢 WebSocket connection fully restored and synced.');
+};
+
   
   ws.onmessage = async (event) => {
     try {
       const msg = JSON.parse(event.data);
-      
+      lastPongTime = Date.now(); // 🕒 Marca de vida del servidor
       // ✅ Notificación de cambio en alguna dirección
       if (msg.method === "blockchain.address.subscribe") {
         const [address, statusHash] = msg.params;
@@ -186,7 +236,7 @@ export function connect(onBalanceUpdate) {
   
   ws.onclose = () => {
     console.warn("❌ WebSocket closed. Attempting reconnect...");
-    
+      stopHeartbeat(); // 💓 Detiene el latido para no dejar intervalos colgando
     // ✅ Limpiar todas las colas pendientes
     pendingUpdates.forEach((pending, address) => {
       clearTimeout(pending.timer);
