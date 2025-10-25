@@ -294,7 +294,7 @@ export function reconnect() {
 }
 
 /* ===================== UPDATE STATUS ===================== */
-function updateStatus(elements, text, type = 'connected') {
+export function updateStatus(elements, text, type = 'connected') {
   if (!elements) return;
   elements.statusText.textContent = text;
   elements.statusIndicator.className = 'status-indicator';
