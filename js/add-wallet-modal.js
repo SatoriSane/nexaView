@@ -18,6 +18,14 @@ export function setupWalletModal(elements) {
         elements.addWalletModal.classList.remove('hidden');
         setTimeout(() => elements.addressInput.focus(), 100);
     });
+    const hint = document.querySelector('.empty-state-hint');
+    const addWalletBtn = document.getElementById('addWalletBtn');
+
+    if (hint && addWalletBtn) {
+    hint.addEventListener('click', () => {
+        addWalletBtn.click();
+    });
+    }
 
     // Cerrar modal con botón o overlay
     elements.closeModalBtn.addEventListener('click', () => closeModal(elements));
