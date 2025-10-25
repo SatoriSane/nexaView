@@ -5,11 +5,18 @@ import { loadSavedWallets, refreshAllWallets } from './wallets.js';
 import { setupWalletModal } from './add-wallet-modal.js';
 import { adjustBalanceFontSize, formatRelativeTime } from './ui.js';
 import { formatBalance } from './balanceClient.js';
-import { initRealtimeStatus, connect, getConnectionStatus, reconnect, updateStatus } from './realtime.js';
 import { openReceiveScreen } from './receive-screen.js';
 import { fetchBalance } from './balanceClient.js';
 import { updateWalletBalance } from './storage.js';
-
+import { 
+  initRealtimeStatus, 
+  connect, 
+  getConnectionStatus, 
+  reconnect, 
+  updateStatus,
+  disconnect,
+  forceReconnect
+} from './realtime.js';
 // ====================================
 // 🎈 ANIMACIÓN DE CORAZONES FLOTANTES
 // ====================================
@@ -170,16 +177,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ✅ Luego conectar WebSocket (ahora sí se suscriben correctamente)
   connect(onBalanceUpdate);
 
-// 🔄 Reintentar conexión y sincronizar balances al volver a la app
+// 🔄 MANEJO MEJORADO DE VISIBILIDAD (reemplazar el listener existente)
 let lastHiddenTime = null;
+let visibilityTimeout = null;
+
 
 document.addEventListener('visibilitychange', async () => {
-  if (document.hidden) {
-    lastHiddenTime = Date.now();
-    return; // Solo registrar tiempo de minimización
+  // Limpiar timeout previo si existe
+  if (visibilityTimeout) {
+    clearTimeout(visibilityTimeout);
+    visibilityTimeout = null;
   }
 
-  console.log('🔄 App visible again — checking connection and syncing balances...');
+  if (document.hidden) {
+    lastHiddenTime = Date.now();
+    console.log('📱 App minimized');
+    return;
+  }
+
+  // App volvió a estar visible
+  console.log('🔄 App visible again — checking connection...');
+  
   const statusUI = {
     statusIndicator: elements.statusIndicator,
     statusText: elements.statusText
@@ -187,45 +205,77 @@ document.addEventListener('visibilitychange', async () => {
 
   const status = getConnectionStatus();
   const timeHidden = lastHiddenTime ? Date.now() - lastHiddenTime : 0;
-  lastHiddenTime = null; // Reset
+  lastHiddenTime = null;
 
-  const LONG_BACKGROUND_MS = 60000; // 60s considerado largo periodo
+  const RECONNECT_THRESHOLD_MS = 30000; // 30 segundos
 
-  if (status === 'connected' && timeHidden < LONG_BACKGROUND_MS) {
-    console.log('✅ WebSocket still connected — restoring UI');
+  console.log(`⏱️ Was hidden for ${(timeHidden / 1000).toFixed(1)}s, status: ${status}`);
+
+  // Estrategia basada en tiempo y estado
+  if (status === 'connected' && timeHidden < RECONNECT_THRESHOLD_MS) {
+    // Conexión activa y poco tiempo ausente - solo verificar
+    console.log('✅ Connection appears healthy — verifying...');
     updateStatus(statusUI, 'Live updates active', 'connected');
-  } else {
-    console.warn('⚠️ WebSocket disconnected or long background — forcing full reconnect');
-    updateStatus(statusUI, 'Reconnecting...', 'connecting');
-
-    try {
-      disconnect();
-      await new Promise(r => setTimeout(r, 600)); // Pequeño delay para limpiar
-      connect(onBalanceUpdate);
-    } catch (err) {
-      console.error('❌ Error during reconnect:', err);
-    }
-  }
-
-  // 🔁 Refrescar balances por seguridad
-  if (state.savedWallets?.length) {
-    console.log('🔄 Refreshing wallet balances after resume...');
-    for (const wallet of state.savedWallets) {
-      try {
-        const balance = await fetchBalance(wallet.address);
-        if (balance !== null) {
-          updateWalletBalance(wallet.address, balance);
-          onBalanceUpdate(wallet.address, balance);
+    
+    // Refrescar balances por seguridad (sin forzar reconexión)
+    visibilityTimeout = setTimeout(async () => {
+      if (state.savedWallets?.length) {
+        console.log('🔄 Syncing balances...');
+        for (const wallet of state.savedWallets) {
+          try {
+            const balance = await fetchBalance(wallet.address);
+            if (balance !== null) {
+              updateWalletBalance(wallet.address, balance);
+              onBalanceUpdate(wallet.address, balance);
+            }
+          } catch (err) {
+            console.warn(`⚠️ Could not sync ${wallet.address}:`, err);
+          }
         }
-      } catch (err) {
-        console.warn(`⚠️ Could not refresh ${wallet.address}:`, err);
       }
-    }
+    }, 500);
+    
+  } else {
+    // Desconectado O mucho tiempo ausente - forzar reconexión limpia
+    console.warn(`⚠️ Forcing reconnect (status: ${status}, hidden: ${(timeHidden/1000).toFixed(1)}s)`);
+    updateStatus(statusUI, 'Reconnecting...', 'connecting');
+    
+    // Usar la nueva función de reconexión forzada
+    forceReconnect();
   }
 });
 
+// iOS puede suspender completamente la app, necesitamos detectar esto
+window.addEventListener('focus', () => {
+  console.log('🪟 Window focused');
+  const status = getConnectionStatus();
+  
+  if (status !== 'connected' && status !== 'connecting') {
+    console.log('🔄 Window focused but not connected — forcing reconnect');
+    forceReconnect();
+  }
+});
 
-
+window.addEventListener('offline', () => {
+  console.log('📵 Network offline');
+  const statusUI = {
+    statusIndicator: elements.statusIndicator,
+    statusText: elements.statusText
+  };
+  updateStatus(statusUI, 'No connection', 'error');
+});
+// 🔄 Manejo de cambios de red (si el móvil cambia de WiFi a datos móviles)
+window.addEventListener('online', () => {
+  console.log('🌐 Network online');
+  const status = getConnectionStatus();
+  
+  if (status !== 'connected') {
+    console.log('🔄 Network restored — forcing reconnect');
+    setTimeout(() => {
+      forceReconnect();
+    }, 1000); // Pequeño delay para que la red se estabilice
+  }
+});
 
   // Inicializar modal de agregar wallet
   setupWalletModal(elements);
