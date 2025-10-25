@@ -171,27 +171,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   connect(onBalanceUpdate);
 
 // 🔄 Reintentar conexión y sincronizar balances al volver a la app
+let lastHiddenTime = null;
+
 document.addEventListener('visibilitychange', async () => {
-  if (document.hidden) return; // Solo actuar al volver a primer plano
+  if (document.hidden) {
+    lastHiddenTime = Date.now();
+    return; // Solo registrar tiempo de minimización
+  }
 
   console.log('🔄 App visible again — checking connection and syncing balances...');
-
-  const status = getConnectionStatus();
-
-  // Referencia local a los elementos del footer
   const statusUI = {
     statusIndicator: elements.statusIndicator,
     statusText: elements.statusText
   };
 
-  if (status === 'connected') {
+  const status = getConnectionStatus();
+  const timeHidden = lastHiddenTime ? Date.now() - lastHiddenTime : 0;
+  lastHiddenTime = null; // Reset
+
+  const LONG_BACKGROUND_MS = 60000; // 60s considerado largo periodo
+
+  if (status === 'connected' && timeHidden < LONG_BACKGROUND_MS) {
     console.log('✅ WebSocket still connected — restoring UI');
     updateStatus(statusUI, 'Live updates active', 'connected');
   } else {
-    console.warn('⚠️ WebSocket disconnected or zombie — forcing full reconnect');
+    console.warn('⚠️ WebSocket disconnected or long background — forcing full reconnect');
     updateStatus(statusUI, 'Reconnecting...', 'connecting');
 
-    // 🔁 Cerrar conexión rota y reconectar con callback global
     try {
       disconnect();
       await new Promise(r => setTimeout(r, 600)); // Pequeño delay para limpiar
@@ -217,6 +223,7 @@ document.addEventListener('visibilitychange', async () => {
     }
   }
 });
+
 
 
 

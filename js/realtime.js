@@ -29,7 +29,6 @@ function startHeartbeat() {
     const now = Date.now();
     const elapsed = now - lastPongTime;
 
-    // Si está conectado, enviamos un ping
     if (ws && ws.readyState === WebSocket.OPEN) {
       try {
         ws.send(JSON.stringify({ method: "ping", id: Date.now() }));
@@ -38,17 +37,14 @@ function startHeartbeat() {
         console.warn("⚠️ Error sending ping:", err);
       }
 
-      // Si pasó demasiado tiempo sin mensaje, reconectar
-      if (elapsed > 30000) { // 30 s sin actividad
-        console.warn("💀 WebSocket heartbeat timeout — reconnecting...");
-        ws.close();
+      if (elapsed > 30000) {
+        console.warn("💀 WebSocket heartbeat timeout — closing socket...");
+        ws.close(); // Solo cerrar, no reconectar automáticamente
       }
-    } else {
-      console.log("🔁 Heartbeat found closed socket — reconnecting...");
-      reconnect();
     }
-  }, 60000); // cada 30 s
+  }, 60000);
 }
+
 
 function stopHeartbeat() {
   if (heartbeatInterval) {
@@ -365,11 +361,17 @@ export function unsubscribe(address) {
 
 /* ===================== DISCONNECT ===================== */
 export function disconnect() {
-  // ✅ Limpiar todas las colas
   pendingUpdates.forEach((pending) => {
     clearTimeout(pending.timer);
   });
   pendingUpdates.clear();
-  
-  if (ws) ws.close();
+
+  stopHeartbeat();
+
+  if (ws) {
+    ws.close();
+    ws = null;
+  }
+
+  reconnectAttempts = 0; // 🔹 resetear contador
 }
