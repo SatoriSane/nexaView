@@ -7,16 +7,118 @@ let ws = null;
 let reconnectTimer = null;
 let reconnectAttempts = 0;
 let statusElements = null;
-let uiUpdateCallback = null; // Callback para actualizar botones
-let balanceUpdateCallback = null; 
+let uiUpdateCallback = null;
+let balanceUpdateCallback = null;
 
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 2;
 const WS_URL = "wss://electrum.nexa.org:20004";
+
+// ✅ NUEVO: Sistema de cola para agrupar notificaciones
+const pendingUpdates = new Map(); // address -> {timer, statusHash, count}
+const UPDATE_DEBOUNCE_MS = 3500; // Esperar 3500ms para agrupar notificaciones
+const MAX_PENDING_MS = 6000; // Máximo 6s de espera
 
 /* ===================== INIT STATUS ===================== */
 export function initRealtimeStatus(elements, onConnectionChange) {
   statusElements = elements;
-  uiUpdateCallback = onConnectionChange; // Callback para mostrar/ocultar botones
+  uiUpdateCallback = onConnectionChange;
+}
+
+/* ===================== PROCESS QUEUED UPDATE ===================== */
+async function processQueuedUpdate(address) {
+  const pending = pendingUpdates.get(address);
+  if (!pending) return;
+  
+  const { count, firstNotificationTime } = pending;
+  pendingUpdates.delete(address);
+  
+  console.log(`🔄 Processing ${count} queued notification(s) for ${address}`);
+  
+  try {
+    // ✅ Esperar un poco más si es la primera notificación (servidor puede estar procesando)
+    const timeSinceFirst = Date.now() - firstNotificationTime;
+    if (timeSinceFirst < 500) {
+      await new Promise(resolve => setTimeout(resolve, 500 - timeSinceFirst));
+    }
+    
+    let updated = null;
+    let retries = 0;
+    const maxRetries = MAX_RETRIES;
+    
+    // ✅ Obtener balance actual para comparar
+    const currentWallet = state.savedWallets.find(w => w.address === address);
+    const previousBalance = currentWallet?.balance ?? 0;
+    
+    // ✅ Reintentar si el balance no cambió
+    while (retries < maxRetries) {
+      updated = await fetchBalance(address);
+      
+      if (updated !== null && updated !== previousBalance) {
+        console.log(`✅ Balance changed: ${previousBalance} → ${updated}`);
+        break; // Balance cambió, salir
+      }
+      
+      retries++;
+      if (retries < maxRetries) {
+        console.log(`⏳ Balance unchanged, retry ${retries}/${maxRetries}...`);
+        await new Promise(resolve => setTimeout(resolve, UPDATE_DEBOUNCE_MS));
+      }
+    }
+    
+    if (updated !== null) {
+      updateWalletBalance(address, updated);
+      if (balanceUpdateCallback) {
+        balanceUpdateCallback(address, updated);
+      }
+    } else {
+      console.warn(`⚠️ Could not fetch updated balance for ${address}`);
+    }
+  } catch (err) {
+    console.error(`❌ Error processing update for ${address}:`, err);
+  }
+}
+
+/* ===================== QUEUE UPDATE ===================== */
+function queueUpdate(address, statusHash) {
+  const existing = pendingUpdates.get(address);
+  const now = Date.now();
+  
+  if (existing) {
+    // Ya hay una actualización pendiente, cancelar el timer anterior
+    clearTimeout(existing.timer);
+    
+    const timeSinceFirst = now - existing.firstNotificationTime;
+    
+    // Si ya pasó el tiempo máximo, procesar inmediatamente
+    if (timeSinceFirst >= MAX_PENDING_MS) {
+      console.log(`⚡ Max wait time reached, processing immediately`);
+      processQueuedUpdate(address);
+      return;
+    }
+    
+    // Actualizar contador y programar nuevo timer
+    existing.count++;
+    existing.statusHash = statusHash;
+    existing.timer = setTimeout(() => {
+      processQueuedUpdate(address);
+    }, UPDATE_DEBOUNCE_MS);
+    
+    console.log(`📊 Queued notification #${existing.count} for ${address}`);
+  } else {
+    // Primera notificación, crear entrada nueva
+    const timer = setTimeout(() => {
+      processQueuedUpdate(address);
+    }, UPDATE_DEBOUNCE_MS);
+    
+    pendingUpdates.set(address, {
+      timer,
+      statusHash,
+      count: 1,
+      firstNotificationTime: now
+    });
+    
+    console.log(`📥 First notification queued for ${address}`);
+  }
 }
 
 /* ===================== CONNECT ===================== */
@@ -33,33 +135,31 @@ export function connect(onBalanceUpdate) {
   
   ws.onopen = async () => {
     console.log("✅ Connected to Rostrum WebSocket");
-    const wasReconnecting = reconnectAttempts > 0;
     reconnectAttempts = 0;
     
     if (statusElements) {
       updateStatus(statusElements, 'Live updates active', 'connected');
     }
     
-    // Notificar que el WS está conectado
     if (uiUpdateCallback) uiUpdateCallback('connected');
     
-// ✅ Siempre sincronizar balances al conectar o reconectar
-if (state.savedWallets?.length) {
-  console.log('🔄 Syncing balances...');
-  for (const wallet of state.savedWallets) {
-    try {
-      const balance = await fetchBalance(wallet.address);
-      if (balance !== null) {
-        updateWalletBalance(wallet.address, balance);
-        if (balanceUpdateCallback) balanceUpdateCallback(wallet.address, balance);
+    // ✅ Sincronizar balances al conectar
+    if (state.savedWallets?.length) {
+      console.log('🔄 Syncing balances...');
+      for (const wallet of state.savedWallets) {
+        try {
+          const balance = await fetchBalance(wallet.address);
+          if (balance !== null) {
+            updateWalletBalance(wallet.address, balance);
+            if (balanceUpdateCallback) balanceUpdateCallback(wallet.address, balance);
+          }
+        } catch (err) {
+          console.warn(`⚠️ Sync failed for ${wallet.address}`);
+        }
       }
-    } catch (err) {
-      console.warn(`⚠️ Sync failed for ${wallet.address}`);
     }
-  }
-}
-
-    // Suscribimos todas las direcciones guardadas
+    
+    // Suscribir todas las direcciones guardadas
     if (state.savedWallets?.length) {
       console.log('📡 Subscribing to saved addresses...');
       state.savedWallets.forEach(wallet => {
@@ -71,19 +171,13 @@ if (state.savedWallets?.length) {
   ws.onmessage = async (event) => {
     try {
       const msg = JSON.parse(event.data);
-      // Notificación de cambio en alguna dirección
+      
+      // ✅ Notificación de cambio en alguna dirección
       if (msg.method === "blockchain.address.subscribe") {
-        const [address] = msg.params;
-        let updated = null;
-        try {
-          updated = await fetchBalance(address);
-        } catch {
-          console.warn(`⚠️ Could not fetch balance for ${address}, skipping...`);
-        }
-        if (updated !== null) {
-          updateWalletBalance(address, updated);
-          if (balanceUpdateCallback) balanceUpdateCallback(address, updated);
-        }
+        const [address, statusHash] = msg.params;
+        
+        // ✅ Agregar a la cola en lugar de procesar inmediatamente
+        queueUpdate(address, statusHash);
       }
     } catch (err) {
       console.warn("⚠️ Error processing message:", err);
@@ -93,11 +187,16 @@ if (state.savedWallets?.length) {
   ws.onclose = () => {
     console.warn("❌ WebSocket closed. Attempting reconnect...");
     
+    // ✅ Limpiar todas las colas pendientes
+    pendingUpdates.forEach((pending, address) => {
+      clearTimeout(pending.timer);
+    });
+    pendingUpdates.clear();
+    
     if (statusElements) {
       updateStatus(statusElements, 'Reconnecting...', 'disconnected');
     }
     
-    // Notificar que el WS está desconectado
     if (uiUpdateCallback) uiUpdateCallback('disconnected');
     
     reconnect();
@@ -124,7 +223,6 @@ export function reconnect() {
       updateStatus(statusElements, 'Manual refresh only', 'error');
     }
     
-    // Notificar que el WS falló permanentemente
     if (uiUpdateCallback) uiUpdateCallback('failed');
     
     reconnectTimer = null;
@@ -193,6 +291,14 @@ export function subscribe(address) {
 
 /* ===================== UNSUBSCRIBE ===================== */
 export function unsubscribe(address) {
+  // ✅ Cancelar cualquier actualización pendiente
+  const pending = pendingUpdates.get(address);
+  if (pending) {
+    clearTimeout(pending.timer);
+    pendingUpdates.delete(address);
+    console.log(`🗑️ Cancelled pending updates for ${address}`);
+  }
+  
   if (!ws || ws.readyState !== WebSocket.OPEN) return;
   try {
     const id = Math.floor(Math.random() * 1000000);
@@ -209,5 +315,11 @@ export function unsubscribe(address) {
 
 /* ===================== DISCONNECT ===================== */
 export function disconnect() {
+  // ✅ Limpiar todas las colas
+  pendingUpdates.forEach((pending) => {
+    clearTimeout(pending.timer);
+  });
+  pendingUpdates.clear();
+  
   if (ws) ws.close();
 }

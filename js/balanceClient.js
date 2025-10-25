@@ -1,4 +1,4 @@
-//balanceClient.js
+//js/balanceClient.js
 import { showError, setLoadingState, setRefreshLoading } from './ui.js';
 
 export async function fetchBalance(address, elements) {

@@ -8,6 +8,7 @@ let receiveContainer = null;
 let celebrationTimeout = null;
 let qrUpdateTimeout = null;
 let initialBalance = null;
+let initialFetchCompleted = false; // ✅ Cambio: detectar si el fetch inicial terminó
 
 /**
  * Opens the receive screen for a specific wallet
@@ -15,6 +16,51 @@ let initialBalance = null;
  */
 export async function openReceiveScreen(wallet) {
     currentWallet = wallet;
+    
+    // ✅ PASO 1: Usar balance en caché inmediatamente (sin esperar)
+    initialBalance = wallet.balance || 0;
+    initialFetchCompleted = false; // ✅ Reset: fetch inicial no ha terminado
+    console.log(`📊 Using cached balance: ${initialBalance}`);
+    
+    // ✅ PASO 2: Configurar callback INMEDIATAMENTE
+    window.receiveScreenCallback = (address, balance) => {
+        if (!currentWallet) return;
+        if (address !== currentWallet.address) return;
+        
+        console.log(`💰 Balance update: ${address} -> ${balance} (initial: ${initialBalance}, fetchCompleted: ${initialFetchCompleted})`);
+        
+        // ✅ Comparar con el balance inicial capturado
+        const receivedAmount = balance - initialBalance;
+        
+        if (receivedAmount > 0) {
+            console.log(`✅ Payment detected: +${receivedAmount}`);
+            
+            // ✅ Siempre actualizar el balance
+            initialBalance = balance;
+            currentWallet.balance = balance;
+            
+            // ✅ Mostrar celebración solo si el fetch inicial YA terminó
+            if (initialFetchCompleted) {
+                showPaymentReceived(receivedAmount);
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+            } else {
+                console.log(`ℹ️ Skipping celebration (waiting for initial fetch to complete)`);
+            }
+        } else if (balance !== initialBalance) {
+            // Balance cambió pero no es positivo (posible gasto, o ajuste)
+            console.log(`ℹ️ Balance changed: ${initialBalance} → ${balance} (${receivedAmount})`);
+            initialBalance = balance;
+            currentWallet.balance = balance;
+        } else {
+            // Balance idéntico, probablemente un duplicate o confirmación
+            console.log(`ℹ️ Balance unchanged: ${balance}`);
+        }
+    };
+    
+    // ✅ PASO 3: Crear y mostrar UI INMEDIATAMENTE (sin await)
     
     if (!receiveContainer) {
         createReceiveScreen();
@@ -44,54 +90,39 @@ export async function openReceiveScreen(wallet) {
     
     generateQR(wallet.address);
     
-    // ✅ CRÍTICO: Obtener balance inicial ANTES de configurar el callback
-    try {
-        initialBalance = await fetchBalance(wallet.address);
-        console.log(`📊 Initial balance for ${wallet.address}: ${initialBalance}`);
-        
-        // Actualizar el balance en el wallet actual
-        if (initialBalance !== null) {
-            currentWallet.balance = initialBalance;
-        }
-    } catch (err) {
-        console.warn('⚠️ Could not fetch initial balance:', err);
-        initialBalance = wallet.balance || 0;
-    }
-    
-    // ✅ Setup WebSocket callback DESPUÉS de tener el balance inicial
-    window.receiveScreenCallback = (address, balance) => {
-        if (!currentWallet) return;
-        if (address !== currentWallet.address) return;
-        
-        console.log(`💰 Balance update: ${address} -> ${balance} (previous: ${initialBalance})`);
-        
-        // Comparar con el balance inicial capturado
-        const referenceBalance = initialBalance ?? currentWallet.balance ?? 0;
-        const receivedAmount = balance - referenceBalance;
-        
-        if (receivedAmount > 0) {
-            console.log(`✅ Payment detected: +${receivedAmount}`);
-            currentWallet.balance = balance;
-            initialBalance = balance; // ← Actualizar referencia
-            showPaymentReceived(receivedAmount);
+    // ✅ PASO 4: Actualizar balance en SEGUNDO PLANO (no bloquea la UI)
+    (async () => {
+        try {
+            console.log(`🔄 Fetching fresh balance in background...`);
+            const freshBalance = await fetchBalance(wallet.address);
             
-            // Haptic feedback if available
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]);
+            if (freshBalance !== null && freshBalance !== initialBalance) {
+                console.log(`🔄 Balance sync: ${initialBalance} → ${freshBalance}`);
+                
+                // ✅ Actualizar balance pero NO mostrar celebración
+                const difference = freshBalance - initialBalance;
+                initialBalance = freshBalance;
+                currentWallet.balance = freshBalance;
+                
+                console.log(`ℹ️ Background sync completed (+${difference})`);
+            } else {
+                console.log(`✅ Balance confirmed: ${initialBalance}`);
             }
-        } else if (balance !== referenceBalance) {
-            // Balance cambió pero no es positivo (posible gasto, o ajuste)
-            console.log(`ℹ️ Balance changed but not positive: ${receivedAmount}`);
-            currentWallet.balance = balance;
-            initialBalance = balance;
+            
+        } catch (err) {
+            console.warn('⚠️ Could not fetch fresh balance:', err);
+        } finally {
+            // ✅ CRÍTICO: Marcar fetch como completado SIEMPRE (éxito o error)
+            // Ahora las notificaciones del WS SÍ mostrarán celebración
+            initialFetchCompleted = true;
+            console.log(`✅ Initial fetch completed, celebrations enabled`);
         }
-    };
+    })();
     
-    // ✅ Determinar si necesitamos suscribir
+    // ✅ PASO 5: Suscribir si es necesario (donation wallet no tracked)
     const isDonationWallet = wallet.address === CONFIG.DONATION_WALLET_ADDRESS;
     const isWalletTracked = state.savedWallets.some(w => w.address === wallet.address);
     
-    // ✅ Suscribir INMEDIATAMENTE (no en then asíncrono)
     if (isDonationWallet && !isWalletTracked) {
         try {
             const realtimeModule = await import('./realtime.js');
@@ -109,11 +140,13 @@ export async function openReceiveScreen(wallet) {
 export function closeReceiveScreen() {
     if (!receiveContainer) return;
     
-    // Capturamos el estado localmente para la promesa asíncrona.
     const walletToClose = currentWallet; 
     
-    // Limpiar callback global
+    // ✅ Limpiar callback INMEDIATAMENTE
     window.receiveScreenCallback = null;
+    
+    // ✅ Resetear flag de fetch
+    initialFetchCompleted = false;
     
     // ✅ Restaurar la vista principal INMEDIATAMENTE
     const main = document.querySelector('main');
@@ -146,10 +179,10 @@ export function closeReceiveScreen() {
             }
         }
         
-        // Limpieza final de referencias globales/de módulo
+        // Limpieza final
         currentWallet = null;
         receiveContainer = null;
-        initialBalance = null; // ← NUEVO: limpiar balance inicial
+        initialBalance = null;
         
         if (celebrationTimeout) {
             clearTimeout(celebrationTimeout);
@@ -596,26 +629,21 @@ function fallbackCopyText(text) {
  * 🎊 Crea una celebración épica de corazones desde abajo
  */
 function createDonationCelebration() {
-    const heartCount = 30; // Cantidad de corazones
+    const heartCount = 30;
     const sizes = ['small', 'small', 'medium', 'medium', 'large', 'xlarge'];
     const speeds = ['slow', 'normal', 'fast', 'veryfast'];
     const drifts = ['', 'drift-left', 'drift-right'];
     
-    // 🎨 Decidir el esquema de colores para TODA la celebración
     const random = Math.random();
     let colorScheme;
     
     if (random < 0.30) {
-        // 30% - Solo dorados
         colorScheme = 'gold-only';
     } else if (random < 0.60) {
-        // 30% - Solo rojos
         colorScheme = 'red-only';
     } else if (random < 0.80) {
-        // 20% - Mix dorado y rojo
         colorScheme = 'gold-red-mix';
     } else {
-        // 20% - Todos los colores (arcoíris)
         colorScheme = 'rainbow';
     }
     
@@ -626,27 +654,19 @@ function createDonationCelebration() {
             const heart = document.createElement('div');
             heart.className = 'donation-heart';
             
-            // 🎨 Aplicar color según el esquema decidido
             switch (colorScheme) {
                 case 'gold-only':
-                    // Sin clase adicional = dorado por defecto
                     break;
-                    
                 case 'red-only':
                     heart.classList.add('red');
                     break;
-                    
                 case 'gold-red-mix':
-                    // 50/50 entre dorado y rojo
                     if (Math.random() > 0.5) {
                         heart.classList.add('red');
                     }
                     break;
-                    
                 case 'rainbow':
-                    // Todos los colores aleatoriamente
                     const colors = ['red', 'purple', 'blue', 'green', 'pink', 'orange'];
-                    // 70% probabilidad de color, 30% de dorado
                     if (Math.random() > 0.3) {
                         const randomColor = colors[Math.floor(Math.random() * colors.length)];
                         heart.classList.add(randomColor);
@@ -654,49 +674,39 @@ function createDonationCelebration() {
                     break;
             }
             
-            // Tamaño aleatorio
             const size = sizes[Math.floor(Math.random() * sizes.length)];
             heart.classList.add(`size-${size}`);
             
-            // Velocidad aleatoria
             const speed = speeds[Math.floor(Math.random() * speeds.length)];
             heart.classList.add(`speed-${speed}`);
             
-            // Dirección aleatoria
             const drift = drifts[Math.floor(Math.random() * drifts.length)];
             if (drift) heart.classList.add(drift);
             
-            // Algunos con pulso
             if (Math.random() > 0.7) {
                 heart.classList.add('pulse');
             }
             
-            // SVG del corazón
             heart.innerHTML = `
                 <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
             `;
             
-            // Posición horizontal aleatoria
             const leftPosition = Math.random() * 100;
             heart.style.left = `${leftPosition}%`;
             
-            // Rotación aleatoria
-            const rotation = (Math.random() * 720) - 360; // -360 a 360 grados
+            const rotation = (Math.random() * 720) - 360;
             heart.style.setProperty('--rotation', `${rotation}deg`);
             
-            // Agregar al body
             document.body.appendChild(heart);
             
-            // Remover después de la animación
             setTimeout(() => {
                 heart.remove();
             }, 5000);
-        }, i * 100); // Escalonar aparición cada 100ms
+        }, i * 100);
     }
     
-    // Haptic feedback épico
     if (navigator.vibrate) {
         navigator.vibrate([100, 50, 100, 50, 100, 50, 200]);
     }
